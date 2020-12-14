@@ -15,9 +15,5 @@
       </PackageReference>
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Data\Attributes" />
-    </ItemGroup>
-
 
 </Project>

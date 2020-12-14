@@ -1,6 +1,11 @@
-﻿using System.Threading.Tasks;
+﻿using System.Net;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Threading.Tasks;
 using DevixonApi.Data.Interfaces;
 using DevixonApi.Data.Requests;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DevixonApi.Controllers
@@ -46,6 +51,25 @@ namespace DevixonApi.Controllers
             }
 
             return BadRequest();
+        }
+
+        [HttpGet]
+        [Authorize]
+        [Route("details")]
+        public async Task<IActionResult> Details()
+        {
+            
+            //
+            // var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:5001/api/user/details");
+            // request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+            // HttpResponseMessage response = await HttpClient.;
+            //
+            // if (response.StatusCode != HttpStatusCode.OK)
+            // {
+            //     return Content(response.ToString());
+            // }
+
+            return Content($"test");
         }
     }
 }

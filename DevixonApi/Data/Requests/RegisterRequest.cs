@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using DevixonApi.Data.Attributes;
 
 namespace DevixonApi.Data.Requests
 {
@@ -10,6 +11,7 @@ namespace DevixonApi.Data.Requests
         public string LastName { get; set; }
         [Required]
         [EmailAddress]
+        [EmailUserUnique]
         public string Email { get; set; }
         [Required]
         public string Password { get; set; }

@@ -74,5 +74,10 @@ namespace DevixonApi.Data.Services
                 Token = token
             };
         }
+
+        // public async Task<> Details()
+        // {
+        //     
+        // }
     }
 }
