@@ -34,5 +34,18 @@ namespace DevixonApi.Controllers
 
             return Ok(loginResponse);
         }
+
+        [HttpPost]
+        [Route("register")]
+        public async Task<IActionResult> Register(RegisterRequest registerRequest)
+        {
+            if (ModelState.IsValid)
+            {
+                var registerResponse = await _userService.Register(registerRequest);
+                return Ok(registerResponse);
+            }
+
+            return BadRequest();
+        }
     }
 }

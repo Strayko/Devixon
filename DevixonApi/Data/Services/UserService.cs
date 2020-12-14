@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using DevixonApi.Data.Entities;
 using DevixonApi.Data.Helpers;
 using DevixonApi.Data.Interfaces;
 using DevixonApi.Data.Requests;
@@ -40,6 +41,36 @@ namespace DevixonApi.Data.Services
                 Email = user.Email, 
                 FirstName = user.FirstName, 
                 LastName = user.LastName, 
+                Token = token
+            };
+        }
+
+        public async Task<RegisterResponse> Register(RegisterRequest registerRequest)
+        {
+            var base64Encode = Base64EncodeHelper.Generate(registerRequest.Password);
+            var passwordHash = HashingHelper.HashUsingPbkdf2(registerRequest.Password, base64Encode);
+
+            var user = _appDbContext.Users.Add(new User
+            {
+                FirstName = registerRequest.FirstName,
+                LastName = registerRequest.LastName,
+                Email = registerRequest.Email,
+                Password = passwordHash,
+                PasswordSalt = base64Encode,
+                Active = true,
+                Blocked = false,
+                TS = DateTime.Now
+            });
+
+            await _appDbContext.SaveChangesAsync();
+            
+            var token = await Task.Run(() => TokenHelper.GenerateToken(user.Entity));
+            
+            return new RegisterResponse
+            {
+                Email = registerRequest.Email,
+                FirstName = registerRequest.FirstName,
+                LastName = registerRequest.LastName,
                 Token = token
             };
         }
