@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using DevixonApi.Data;
 using DevixonApi.Data.Interfaces;
@@ -15,6 +16,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Logging;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 
 namespace DevixonApi
@@ -32,23 +35,24 @@ namespace DevixonApi
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
-
-            services.AddAuthentication(options =>
-                {
-                    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-                })
+            
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
                 {
+                    var key = Convert.FromBase64String(Configuration.GetSection("Secret:Key").Value);
+                    var signingKey = new SymmetricSecurityKey(key);
+                    
+                    options.Authority = "https://localhost:5001";
                     options.RequireHttpsMetadata = false;
                     options.SaveToken = true;
+                    options.Configuration = new OpenIdConnectConfiguration();
                     options.TokenValidationParameters = new TokenValidationParameters
                     {
                         ValidateIssuer = true,
                         ValidateAudience = true,
                         ValidateLifetime = true,
                         ValidateIssuerSigningKey = true,
-                        // IssuerSigningKey = new X509SecurityKey(),
+                        IssuerSigningKey = signingKey,
                         ValidIssuer = "http://codingsonata.com",
                         ValidAudience = "http://codingsonata.com",
                     };
@@ -69,14 +73,15 @@ namespace DevixonApi
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+                IdentityModelEventSource.ShowPII = true;
             }
 
             app.UseHttpsRedirection();
 
             app.UseRouting();
 
-            app.UseAuthorization();
             app.UseAuthentication();
+            app.UseAuthorization();
 
             app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
         }

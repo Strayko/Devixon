@@ -3,29 +3,31 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using DevixonApi.Data.Entities;
+using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
 namespace DevixonApi.Data.Helpers
 {
     public class TokenHelper
     {
-        public const string Issuer = "http://codingsonata.com";
-        public const string Audience = "http://codingsonata.com";
-
+        private const string Issuer = "http://codingsonata.com";
+        private const string Audience = "http://codingsonata.com";
+        
         public const string Secret =
             "OFRC1j9aaR2BvADxNWlG2pmuD392UfQBZZLM1fuzDEzDlEpSsn+btrpJKd3FfY855OMA9oK4Mc8y48eYUrVUSw==";
-
-        public static string GenerateSecureSecret()
-        {
-            var hmac = new HMACSHA256();
-            return Convert.ToBase64String(hmac.Key);
-        }
+        
+        
+        // public static string GenerateSecureSecret()
+        // {
+        //     var hmac = new HMACSHA256();
+        //     return Convert.ToBase64String(hmac.Key);
+        // }
 
         public static string GenerateToken(User user)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Convert.FromBase64String(Secret);
-            
+
             var claimsIdentity = new ClaimsIdentity(new[]
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),

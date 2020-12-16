@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace DevixonApi.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class UserController : ControllerBase
@@ -20,8 +21,9 @@ namespace DevixonApi.Controllers
         {
             _userService = userService;
         }
-
+        
         [HttpPost]
+        [AllowAnonymous]
         [Route("login")]
         public async Task<IActionResult> Login(LoginRequest loginRequest)
         {
@@ -39,8 +41,9 @@ namespace DevixonApi.Controllers
 
             return Ok(loginResponse);
         }
-
+        
         [HttpPost]
+        [AllowAnonymous]
         [Route("register")]
         public async Task<IActionResult> Register(RegisterRequest registerRequest)
         {
@@ -54,7 +57,6 @@ namespace DevixonApi.Controllers
         }
 
         [HttpGet]
-        [Authorize]
         [Route("details")]
         public async Task<IActionResult> Details()
         {
