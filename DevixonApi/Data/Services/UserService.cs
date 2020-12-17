@@ -6,6 +6,7 @@ using DevixonApi.Data.Helpers;
 using DevixonApi.Data.Interfaces;
 using DevixonApi.Data.Requests;
 using DevixonApi.Data.Responses;
+using Microsoft.EntityFrameworkCore;
 
 namespace DevixonApi.Data.Services
 {
@@ -18,7 +19,7 @@ namespace DevixonApi.Data.Services
             _appDbContext = appDbContext;
         }
 
-        public async Task<LoginResponse> Login(LoginRequest loginRequest)
+        public async Task<LoginResponse> Authenticate(LoginRequest loginRequest)
         {
             var user = _appDbContext.Users.SingleOrDefault(user => user.Email == loginRequest.Email);
 
@@ -45,7 +46,7 @@ namespace DevixonApi.Data.Services
             };
         }
 
-        public async Task<RegisterResponse> Register(RegisterRequest registerRequest)
+        public async Task<RegisterResponse> Registration(RegisterRequest registerRequest)
         {
             var base64Encode = Base64EncodeHelper.Generate(registerRequest.Password);
             var passwordHash = HashingHelper.HashUsingPbkdf2(registerRequest.Password, base64Encode);
@@ -75,9 +76,10 @@ namespace DevixonApi.Data.Services
             };
         }
 
-        // public async Task<> Details()
-        // {
-        //     
-        // }
+        public async Task<User> GetUserAsync(int userId)
+        {
+            IQueryable<User> user = _appDbContext.Users.Where(u => u.Id == userId);
+            return await user.FirstOrDefaultAsync();
+        }
     }
 }

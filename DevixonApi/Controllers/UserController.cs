@@ -1,8 +1,13 @@
-﻿using System.Net;
+﻿using System;
+using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Security.Claims;
 using System.Threading.Tasks;
+using AutoMapper;
 using DevixonApi.Data.Interfaces;
+using DevixonApi.Data.Models;
 using DevixonApi.Data.Requests;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
@@ -16,10 +21,12 @@ namespace DevixonApi.Controllers
     public class UserController : ControllerBase
     {
         private readonly IUserService _userService;
+        private readonly IMapper _mapper;
 
-        public UserController(IUserService userService)
+        public UserController(IUserService userService, IMapper mapper)
         {
             _userService = userService;
+            _mapper = mapper;
         }
         
         [HttpPost]
@@ -32,7 +39,7 @@ namespace DevixonApi.Controllers
                 return BadRequest("Missing login details");
             }
 
-            var loginResponse = await _userService.Login(loginRequest);
+            var loginResponse = await _userService.Authenticate(loginRequest);
 
             if (loginResponse == null)
             {
@@ -49,7 +56,7 @@ namespace DevixonApi.Controllers
         {
             if (ModelState.IsValid)
             {
-                var registerResponse = await _userService.Register(registerRequest);
+                var registerResponse = await _userService.Registration(registerRequest);
                 return Ok(registerResponse);
             }
 
@@ -58,20 +65,19 @@ namespace DevixonApi.Controllers
 
         [HttpGet]
         [Route("details")]
-        public async Task<IActionResult> Details()
+        public async Task<ActionResult<UserModel>> Details()
         {
-            
-            //
-            // var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:5001/api/user/details");
-            // request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-            // HttpResponseMessage response = await HttpClient.;
-            //
-            // if (response.StatusCode != HttpStatusCode.OK)
-            // {
-            //     return Content(response.ToString());
-            // }
 
-            return Content($"test");
+            var userId = HttpContext.User.Claims.First().Value;
+            if (userId == null)
+                return BadRequest("User ID not found or token expiry.");
+            
+            var user = await _userService.GetUserAsync(Int32.Parse(userId));
+
+            if (user == null)
+                return NotFound();
+
+            return _mapper.Map<UserModel>(user);
         }
     }
 }

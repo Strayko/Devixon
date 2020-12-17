@@ -10,13 +10,6 @@ namespace DevixonApi.Data.Helpers
 {
     public class TokenHelper
     {
-        private const string Issuer = "http://codingsonata.com";
-        private const string Audience = "http://codingsonata.com";
-        
-        public const string Secret =
-            "OFRC1j9aaR2BvADxNWlG2pmuD392UfQBZZLM1fuzDEzDlEpSsn+btrpJKd3FfY855OMA9oK4Mc8y48eYUrVUSw==";
-        
-        
         // public static string GenerateSecureSecret()
         // {
         //     var hmac = new HMACSHA256();
@@ -26,7 +19,7 @@ namespace DevixonApi.Data.Helpers
         public static string GenerateToken(User user)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Convert.FromBase64String(Secret);
+            var key = Convert.FromBase64String(JwtCredentialsHelper.Secret);
 
             var claimsIdentity = new ClaimsIdentity(new[]
             {
@@ -39,8 +32,8 @@ namespace DevixonApi.Data.Helpers
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = claimsIdentity,
-                Issuer = Issuer,
-                Audience = Audience,
+                Issuer = JwtCredentialsHelper.Issuer,
+                Audience = JwtCredentialsHelper.Audience,
                 Expires = DateTime.Now.AddMinutes(15),
                 SigningCredentials = signingCredentials,
             };

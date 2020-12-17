@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using AutoMapper;
 using DevixonApi.Data;
 using DevixonApi.Data.Interfaces;
 using DevixonApi.Data.Services;
@@ -35,6 +36,8 @@ namespace DevixonApi
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+
+            services.AddAutoMapper();
             
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
