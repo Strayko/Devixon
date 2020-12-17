@@ -7,6 +7,7 @@ using DevixonApi.Data.Interfaces;
 using DevixonApi.Data.Requests;
 using DevixonApi.Data.Responses;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace DevixonApi.Data.Services
 {
@@ -19,38 +20,51 @@ namespace DevixonApi.Data.Services
             _appDbContext = appDbContext;
         }
 
-        public async Task<LoginResponse> Authenticate(LoginRequest loginRequest)
+        public async Task<LoggedUserResponse> Authenticate(LoginRequest loginRequest)
         {
             var user = _appDbContext.Users.SingleOrDefault(user => user.Email == loginRequest.Email);
-
-            if (user == null)
-            {
-                return null;
-            }
+            if (user == null) return null;
             
             var passwordHash = HashingHelper.HashUsingPbkdf2(loginRequest.Password, user.PasswordSalt);
-
-            if (user.Password != passwordHash)
-            {
-                return null;
-            }
+            if (user.Password != passwordHash) return null;
 
             var token = await Task.Run(() => TokenHelper.GenerateToken(user));
 
-            return new LoginResponse
-            {
-                Email = user.Email, 
-                FirstName = user.FirstName, 
-                LastName = user.LastName, 
-                Token = token
-            };
+            return LoggedUserResponse(user, token);
         }
 
-        public async Task<RegisterResponse> Registration(RegisterRequest registerRequest)
+        public async Task<LoggedUserResponse> Registration(RegisterRequest registerRequest)
         {
             var base64Encode = Base64EncodeHelper.Generate(registerRequest.Password);
             var passwordHash = HashingHelper.HashUsingPbkdf2(registerRequest.Password, base64Encode);
 
+            var user = CreateUser(registerRequest, passwordHash, base64Encode);
+            await _appDbContext.SaveChangesAsync();
+            
+            var token = await Task.Run(() => TokenHelper.GenerateToken(user.Entity));
+
+            return LoggedUserResponse(user.Entity, token);
+        }
+
+        public async Task<User> GetUserAsync(int userId)
+        {
+            IQueryable<User> user = _appDbContext.Users.Where(u => u.Id == userId);
+            return await user.FirstOrDefaultAsync();
+        }
+        
+        private static LoggedUserResponse LoggedUserResponse(User user, string token)
+        {
+            return new LoggedUserResponse()
+            {
+                Email = user.Email,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Token = token
+            };
+        }
+        
+        private EntityEntry<User> CreateUser(RegisterRequest registerRequest, string passwordHash, string base64Encode)
+        {
             var user = _appDbContext.Users.Add(new User
             {
                 FirstName = registerRequest.FirstName,
@@ -62,24 +76,7 @@ namespace DevixonApi.Data.Services
                 Blocked = false,
                 TS = DateTime.Now
             });
-
-            await _appDbContext.SaveChangesAsync();
-            
-            var token = await Task.Run(() => TokenHelper.GenerateToken(user.Entity));
-            
-            return new RegisterResponse
-            {
-                Email = registerRequest.Email,
-                FirstName = registerRequest.FirstName,
-                LastName = registerRequest.LastName,
-                Token = token
-            };
-        }
-
-        public async Task<User> GetUserAsync(int userId)
-        {
-            IQueryable<User> user = _appDbContext.Users.Where(u => u.Id == userId);
-            return await user.FirstOrDefaultAsync();
+            return user;
         }
     }
 }

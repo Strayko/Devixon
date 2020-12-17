@@ -1,6 +1,6 @@
 ﻿namespace DevixonApi.Data.Responses
 {
-    public class RegisterResponse
+    public class LoggedUserResponse
     {
         public string Email { get; set; }
         public string FirstName { get; set; }

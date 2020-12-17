@@ -7,8 +7,8 @@ namespace DevixonApi.Data.Interfaces
 {
     public interface IUserService
     {
-        Task<LoginResponse> Authenticate(LoginRequest loginRequest);
-        Task<RegisterResponse> Registration(RegisterRequest registerRequest);
+        Task<LoggedUserResponse> Authenticate(LoginRequest loginRequest);
+        Task<LoggedUserResponse> Registration(RegisterRequest registerRequest);
         Task<User> GetUserAsync(int userId);
     }
 }

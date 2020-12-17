@@ -34,19 +34,13 @@ namespace DevixonApi.Controllers
         [Route("login")]
         public async Task<IActionResult> Login(LoginRequest loginRequest)
         {
-            if (loginRequest == null || string.IsNullOrEmpty(loginRequest.Email) || string.IsNullOrEmpty(loginRequest.Password))
+            if (ModelState.IsValid)
             {
-                return BadRequest("Missing login details");
+                var loginResponse = await _userService.Authenticate(loginRequest);
+                return Ok(loginResponse);
             }
 
-            var loginResponse = await _userService.Authenticate(loginRequest);
-
-            if (loginResponse == null)
-            {
-                return BadRequest("Invalid credentials");
-            }
-
-            return Ok(loginResponse);
+            return BadRequest();
         }
         
         [HttpPost]
@@ -69,13 +63,10 @@ namespace DevixonApi.Controllers
         {
 
             var userId = HttpContext.User.Claims.First().Value;
-            if (userId == null)
-                return BadRequest("User ID not found or token expiry.");
+            if (userId == null) return BadRequest("User ID not found or token expiry.");
             
             var user = await _userService.GetUserAsync(Int32.Parse(userId));
-
-            if (user == null)
-                return NotFound();
+            if (user == null) return NotFound();
 
             return _mapper.Map<UserModel>(user);
         }
