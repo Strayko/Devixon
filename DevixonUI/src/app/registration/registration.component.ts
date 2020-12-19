@@ -1,5 +1,7 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, Input, OnInit} from '@angular/core';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
+import {UserService} from '../shared/user.service';
+import {Router} from '@angular/router';
 
 @Component({
   templateUrl: './registration.component.html',
@@ -19,19 +21,28 @@ import {FormControl, FormGroup, Validators} from '@angular/forms';
   `]
 })
 export class RegistrationComponent implements OnInit{
+  constructor(private userService: UserService, private router: Router) {
+  }
+
   userForm: FormGroup;
   private firstName: FormControl
   private lastName: FormControl
   private email: FormControl
+  private password: FormControl
+  private passwordAgain: FormControl
 
   ngOnInit() {
     this.firstName = new FormControl(this.firstName, [Validators.required, Validators.pattern('[a-zA-Z].*')]);
     this.lastName = new FormControl(this.lastName, [Validators.required, Validators.pattern('[a-zA-Z].*')]);
     this.email = new FormControl(this.email, [Validators.required, Validators.pattern("^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$")]);
+    this.password = new FormControl(this.password, Validators.required)
+    this.passwordAgain = new FormControl(this.passwordAgain, Validators.required)
     this.userForm = new FormGroup({
       firstName: this.firstName,
       lastName: this.lastName,
-      email: this.email
+      email: this.email,
+      password: this.password,
+      passwordAgain: this.passwordAgain
     })
   }
 
@@ -47,6 +58,28 @@ export class RegistrationComponent implements OnInit{
     return this.email.valid || this.email.untouched
   }
 
+  validatePassword() {
+    return this.password.valid || this.password.untouched
+  }
+
+  validatePasswordAgain() {
+    return this.passwordAgain.valid || this.passwordAgain.untouched
+  }
+
+  checkPassword(userForm) {
+    let pass = userForm.password
+    let confirmPassword = userForm.passwordAgain
+    return pass == confirmPassword;
+  }
+
+  isEmpty(userForm) {
+    let empty = userForm.email
+    if (empty == '' || empty == null) {
+      return false
+    }
+    return true
+  }
+
   validateAllFormFields(formGroup: FormGroup) {
     Object.keys(formGroup.controls).forEach(field => {
       const control = formGroup.get(field);
@@ -59,8 +92,14 @@ export class RegistrationComponent implements OnInit{
   }
 
   saveUser(formValues) {
-    if (this.userForm.invalid) {
-
+    if (formValues.valid) {
+      let objectValue = formValues.value
+      delete objectValue['passwordAgain']
+      this.userService.saveUser(objectValue).subscribe(() => {
+        this.router.navigate(['/'])
+      })
+      return true
     }
+    return false
   }
 }
