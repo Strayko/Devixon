@@ -1,1 +1,32 @@
 /* You can add global styles to this file, and also import other style files */
+body {
+  font-family: 'Dosis', sans-serif;
+}
+@media (max-width: 1257px) {
+  .flex.justify-between.mx-52 {
+    margin-left: 5rem!important;
+    margin-right: 5rem!important;
+  }
+  .w-40 {
+    width: 40%!important;
+  }
+}
+@media (max-width: 685px) {
+  .flex.justify-between.mx-52 {
+    display: block!important;
+  }
+  .w-40 {
+    width: 100%!important;
+    margin-bottom: 30px!important;
+  }
+}
+@media (max-width: 400px) {
+  .flex.justify-between.mt-40.mx-52 {
+    margin-left: 1rem!important;
+    margin-right: 1rem!important;
+  }
+  .flex.justify-between.mx-52 {
+    margin-left: 1rem!important;
+    margin-right: 1rem!important;
+  }
+}

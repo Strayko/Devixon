@@ -1,0 +1,42 @@
+<div class="grid min-h-screen place-items-center">
+  <div class="w-11/12 p-12 bg-white sm:w-8/12 md:w-1/2 lg:w-5/12">
+    <h1 class="text-xl font-semibold">Hello there 👋, <span class="font-normal">please fill in your information to continue</span></h1>
+
+    <form [formGroup]="userForm" (ngSubmit)="saveUser(userForm.value)" autocomplete="off" novalidate class="mt-5">
+
+      <div class="flex flex-col mb-4" [ngClass]="{'error' : !validateFirstName()}">
+        <label class="mb-2 uppercase font-bold text-lg text-grey-darkest" for="firstName">First Name</label>
+        <em *ngIf="!validateFirstName() && userForm.controls.firstName.errors.required">Required</em>
+        <input type="text" name="firstName" formControlName="firstName" id="firstName" class="border py-2 px-3 text-grey-darkest">
+      </div>
+
+      <div class="flex flex-col mb-4" [ngClass]="{'error': !validateLastName()}">
+        <label class="mb-2 uppercase font-bold text-lg text-grey-darkest" for="lastName">Last Name</label>
+        <em *ngIf="!validateLastName() && userForm.controls.lastName.errors.required">Required</em>
+        <input type="text" name="lastName" formControlName="lastName" id="lastName" class="border py-2 px-3 text-grey-darkest">
+      </div>
+
+      <div class="flex flex-col mb-4" [ngClass]="{'error': !validateEmail()}">
+        <label class="mb-2 uppercase font-bold text-lg text-grey-darkest" for="email">Email</label>
+        <em *ngIf="!validateEmail() && userForm.controls.email.errors.required">Required</em>
+        <input type="email" name="email" formControlName="email" id="email" class="border py-2 px-3 text-grey-darkest">
+      </div>
+
+      <div class="flex flex-col mb-4">
+        <label class="mb-2 uppercase font-bold text-lg text-grey-darkest" for="password">Password</label>
+        <input type="password" name="password" id="password" class="border py-2 px-3 text-grey-darkest">
+      </div>
+
+      <div class="flex flex-col mb-4">
+        <label class="mb-2 uppercase font-bold text-lg text-grey-darkest" for="passwordAgain">Password Again</label>
+        <input type="password" name="passwordAgain" id="passwordAgain" class="border py-2 px-3 text-grey-darkest">
+      </div>
+
+      <button (click)="validateAllFormFields(userForm)" type="submit" class="mt-5 w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg">
+        Sign Up
+      </button>
+
+    </form>
+
+  </div>
+</div>
