@@ -11,7 +11,7 @@ export class UserService {
   constructor(private http: HttpClient) {
   }
 
-  saveUser(user) {
+  save(user) {
     let options = {headers: new HttpHeaders({'Content-Type': 'application/json'})}
     return this.http.post<ILoggedUser>(this.localHost + '/api/user/register', user, options)
       .pipe(
@@ -19,6 +19,19 @@ export class UserService {
           console.log(data)
           return data
         }), catchError(this.handleError<ILoggedUser>('saveUser')))
+  }
+
+  login(user) {
+    let options = {headers: new HttpHeaders({'Content-Type': 'application/json'})}
+    return this.http.post<ILoggedUser>(this.localHost + '/api/user/login', user, options)
+      .pipe(
+        map((data: ILoggedUser) => {
+          if (data != null) {
+            return data
+          }
+          return catchError(this.handleError('loginUser'))
+        })
+      )
   }
 
   private handleError<T> (operation = 'operation', result?: T) {

@@ -1,0 +1,31 @@
+<div class="grid min-h-screen place-items-center">
+  <div class="w-11/12 p-12 bg-white sm:w-8/12 md:w-1/2 lg:w-5/12">
+    <h1 class="text-xl font-semibold"><span class="font-normal">Please enter your login information 👋</span></h1>
+
+    <form [formGroup]="loginForm" (ngSubmit)="loginUser(loginForm)" class="mt-5">
+
+      <div class="flex flex-col mb-4" [ngClass]="{'error': !validateEmail()}">
+        <label class="mb-2 uppercase font-bold text-lg text-grey-darkest" for="email">Email</label>
+        <em *ngIf="!validateEmail() && loginForm.controls.email.errors.required">Required</em>
+        <em *ngIf="!validateEmail() && !isEmpty(loginForm.value)">Incorrect Email Type</em>
+        <input type="email" name="email" formControlName="email" id="email" class="border py-2 px-3 text-grey-darkest">
+      </div>
+
+      <div class="flex mb-4 justify-center">
+        <em>{{invalidCredentials}}</em>
+      </div>
+
+      <div class="flex flex-col mb-4" [ngClass]="{'error': !validatePassword()}">
+        <label class="mb-2 uppercase font-bold text-lg text-grey-darkest" for="password">Password</label>
+        <em *ngIf="!validatePassword() && loginForm.controls.password.errors.required">Required</em>
+        <input type="password" name="password" formControlName="password" id="password" class="border py-2 px-3 text-grey-darkest">
+      </div>
+
+      <button (click)="validateAllFormFields(loginForm)" type="submit" class="mt-5 w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg">
+        Sign In
+      </button>
+
+    </form>
+
+  </div>
+</div>

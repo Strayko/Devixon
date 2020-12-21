@@ -9,11 +9,13 @@ import {RegistrationComponent} from './registration/registration.component';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {UserService} from './shared/user.service';
 import {HttpClientModule} from '@angular/common/http';
+import {LoginComponent} from './login/login.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     RegistrationComponent,
+    LoginComponent,
     DevixonAppComponent
   ],
   imports: [

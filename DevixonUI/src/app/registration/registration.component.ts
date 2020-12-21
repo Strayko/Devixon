@@ -5,20 +5,7 @@ import {Router} from '@angular/router';
 
 @Component({
   templateUrl: './registration.component.html',
-  styles: [`
-    em {
-      float: right;
-      color: #E05C65;
-      padding-left: 10px;
-    }
-    .error input {
-      background-color: #E3C3C5;
-    }
-    .error ::-webkit-input-placeholder {color: #999;}
-    .error ::-moz-placeholder {color: #999}
-    .error :-moz-placeholder {color: #999}
-    .error :-ms-input-placeholder {color: #999}
-  `]
+  styleUrls: ['./registration.component.css']
 })
 export class RegistrationComponent implements OnInit{
   constructor(private userService: UserService, private router: Router) {
@@ -101,7 +88,7 @@ export class RegistrationComponent implements OnInit{
     if (formValues.valid) {
       let objectValue = formValues.value
       delete objectValue['passwordAgain']
-      this.userService.saveUser(objectValue).subscribe(() => {
+      this.userService.save(objectValue).subscribe(() => {
         this.router.navigate(['/'])
       })
       return true

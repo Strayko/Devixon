@@ -37,7 +37,12 @@ namespace DevixonApi.Controllers
             if (ModelState.IsValid)
             {
                 var loginResponse = await _userService.Authenticate(loginRequest);
-                return Ok(loginResponse);
+                if (loginResponse != null)
+                {
+                    return Ok(loginResponse);
+                }
+                
+                return BadRequest(new {errors = "Invalid Credentials"});
             }
 
             return BadRequest();
