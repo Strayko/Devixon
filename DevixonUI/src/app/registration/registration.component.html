@@ -19,14 +19,15 @@
       <div class="flex flex-col mb-4" [ngClass]="{'error': !validateEmail()}">
         <label class="mb-2 uppercase font-bold text-lg text-grey-darkest" for="email">Email</label>
         <em *ngIf="!validateEmail() && userForm.controls.email.errors.required">Required</em>
-        <em *ngIf="!validateEmail() && isEmpty(userForm.value)">Incorrect Email Type</em>
+        <em *ngIf="!validateEmail() && !isEmpty(userForm.value)">Incorrect Email Type</em>
         <input type="email" name="email" formControlName="email" id="email" class="border py-2 px-3 text-grey-darkest">
       </div>
 
       <div class="flex flex-col mb-4" [ngClass]="{'error': !validatePassword()}">
         <label class="mb-2 uppercase font-bold text-lg text-grey-darkest" for="password">Password</label>
         <em *ngIf="!validatePassword() && userForm.controls.password.errors.required">Required</em>
-        <input type="password" name="password" formControlName="password" id="password" class="border py-2 px-3 text-grey-darkest">
+        <em>{{passwordRegexFilter}}</em>
+        <input (keyup)="validatePasswordRegx(userForm.value)" type="password" name="password" formControlName="password" id="password" class="border py-2 px-3 text-grey-darkest">
       </div>
 
       <div class="flex flex-col mb-4" [ngClass]="{'error': !validatePasswordAgain() || (!checkPassword(userForm.value) && userForm.controls.passwordAgain.valid)}">

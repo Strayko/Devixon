@@ -1,4 +1,4 @@
-export class LoggedUser {
+export interface ILoggedUser {
   email: string
   firstName: string
   lastName: string

@@ -2,21 +2,23 @@ import {Injectable} from '@angular/core';
 import {Observable, of} from 'rxjs';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {catchError, map} from 'rxjs/operators';
-import {LoggedUser} from './logged-user';
+import {ILoggedUser} from './logged-user';
+import ApiParams from '../shared/api-params.json';
 
 @Injectable()
 export class UserService {
+  private localHost = ApiParams['localHost']
   constructor(private http: HttpClient) {
   }
 
   saveUser(user) {
     let options = {headers: new HttpHeaders({'Content-Type': 'application/json'})}
-    return this.http.post('https://localhost:5001/api/user/register', user, options)
+    return this.http.post<ILoggedUser>(this.localHost + '/api/user/register', user, options)
       .pipe(
-        map((data: LoggedUser) => {
+        map((data: ILoggedUser) => {
           console.log(data)
           return data
-        }), catchError(this.handleError('saveUser')))
+        }), catchError(this.handleError<ILoggedUser>('saveUser')))
   }
 
   private handleError<T> (operation = 'operation', result?: T) {
