@@ -2,7 +2,6 @@ import {Component, OnInit} from '@angular/core';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {UserService} from '../shared/user.service';
 import {Router} from '@angular/router';
-import {errorObject} from 'rxjs/internal-compatibility';
 
 @Component({
   templateUrl: './login.component.html',
@@ -47,9 +46,7 @@ export class LoginComponent implements OnInit{
           this.router.navigate(['/'])
         }
       }, (error) => {
-        let jsonStringify = JSON.stringify(error['error'])
-        let jsonParse = JSON.parse(jsonStringify)
-        this.invalidCredentials = jsonParse['errors']
+        this.invalidCredentials = error['error']['errors']
       })
     }
   }
