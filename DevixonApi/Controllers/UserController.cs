@@ -6,6 +6,7 @@ using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using AutoMapper;
+using DevixonApi.Data.Entities;
 using DevixonApi.Data.Interfaces;
 using DevixonApi.Data.Models;
 using DevixonApi.Data.Requests;
@@ -68,12 +69,23 @@ namespace DevixonApi.Controllers
         {
 
             var userId = HttpContext.User.Claims.First().Value;
-            if (userId == null) return BadRequest("User ID not found or token expiry.");
+            if (userId == null) return BadRequest(new {errors = "User ID not found."});
             
             var user = await _userService.GetUserAsync(Int32.Parse(userId));
             if (user == null) return NotFound();
 
             return _mapper.Map<UserModel>(user);
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        [Route("validate")]
+        public IActionResult Validate(Token token)
+        {
+            var validate = _userService.ValidateUser(token);
+            if (validate) return Ok(new {success = "Token is valid."});
+
+            return BadRequest(new {errors = "Token has expired."});
         }
     }
 }

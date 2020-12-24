@@ -30,7 +30,7 @@ namespace DevixonApi.Data.Services
 
             var token = await Task.Run(() => TokenHelper.GenerateToken(user));
 
-            return LoggedUserResponse(user, token);
+            return LoggedUser(user, token);
         }
 
         public async Task<LoggedUserResponse> Registration(RegisterRequest registerRequest)
@@ -43,7 +43,7 @@ namespace DevixonApi.Data.Services
             
             var token = await Task.Run(() => TokenHelper.GenerateToken(user.Entity));
 
-            return LoggedUserResponse(user.Entity, token);
+            return LoggedUser(user.Entity, token);
         }
 
         public async Task<User> GetUserAsync(int userId)
@@ -51,8 +51,14 @@ namespace DevixonApi.Data.Services
             IQueryable<User> user = _appDbContext.Users.Where(u => u.Id == userId);
             return await user.FirstOrDefaultAsync();
         }
+
+        public bool ValidateUser(Token token)
+        {
+            var userToken = TokenHelper.ValidateCurrentToken(token);
+            return userToken;
+        }
         
-        private static LoggedUserResponse LoggedUserResponse(User user, string token)
+        private static LoggedUserResponse LoggedUser(User user, string token)
         {
             return new LoggedUserResponse()
             {

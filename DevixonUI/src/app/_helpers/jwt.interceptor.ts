@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {HttpEvent, HttpHandler, HttpInterceptor, HttpRequest} from '@angular/common/http';
-import {UserService} from './user.service';
+import {UserService} from '../shared/user.service';
 import {Observable} from 'rxjs';
 import ApiParams from '../shared/api-params.json';
 

@@ -10,5 +10,6 @@ namespace DevixonApi.Data.Interfaces
         Task<LoggedUserResponse> Authenticate(LoginRequest loginRequest);
         Task<LoggedUserResponse> Registration(RegisterRequest registerRequest);
         Task<User> GetUserAsync(int userId);
+        bool ValidateUser(Token token);
     }
 }

@@ -1,7 +1,6 @@
 import {Component, OnInit} from '@angular/core';
-import {User} from './shared/user-details';
 import {UserService} from './shared/user.service';
-import {HTTP_INTERCEPTORS} from '@angular/common/http';
+import {ILoggedUser} from './_interface/logged-user';
 
 @Component({
   selector: 'devixon-app',
@@ -11,7 +10,7 @@ import {HTTP_INTERCEPTORS} from '@angular/common/http';
   `
 })
 export class DevixonAppComponent{
-  user: User
+  user: ILoggedUser
 
   constructor(private userService: UserService) {
     this.userService.currentUser.subscribe(x => this.user = x)

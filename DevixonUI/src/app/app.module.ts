@@ -11,8 +11,8 @@ import { UserService } from './shared/user.service';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { LoginComponent } from './login/login.component';
 import { NavComponent } from './nav/nav.component';
-import { DetailsComponent } from './userDetails/details.component';
-import { JwtInterceptor } from './shared/jwt.interceptor';
+import { DetailsComponent } from './user-details/details.component';
+import { JwtInterceptor } from './_helpers/jwt.interceptor';
 
 @NgModule({
   declarations: [

@@ -2,22 +2,23 @@ import {Injectable} from '@angular/core';
 import {BehaviorSubject, Observable, of} from 'rxjs';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {catchError, map} from 'rxjs/operators';
-import {ILoggedUser} from './logged-user';
+import {ILoggedUser} from '../_interface/logged-user';
 import ApiParams from '../shared/api-params.json';
-import {User} from './user-details';
+import { IUser } from '../_interface/user-details';
+import {IToken} from '../_interface/token';
 
 @Injectable()
 export class UserService {
   private localHost = ApiParams['localHost']
-  private currentUserSubject: BehaviorSubject<User>
-  public currentUser: Observable<User>
+  private currentUserSubject: BehaviorSubject<ILoggedUser>
+  public currentUser: Observable<ILoggedUser>
 
   constructor(private http: HttpClient) {
-    this.currentUserSubject = new BehaviorSubject<User>(JSON.parse(localStorage.getItem('currentUser')))
+    this.currentUserSubject = new BehaviorSubject<ILoggedUser>(JSON.parse(localStorage.getItem('currentUser')))
     this.currentUser = this.currentUserSubject.asObservable()
   }
 
-  public get currentUserValue(): User {
+  public get currentUserValue(): ILoggedUser {
     return this.currentUserSubject.value;
   }
 
@@ -43,6 +44,30 @@ export class UserService {
           }
           return catchError(this.handleError('loginUser'))
         })
+      )
+  }
+
+  validate(token) {
+    let options = {headers: new HttpHeaders({'Content-Type': 'application/json'})}
+    return this.http.post<IToken>(this.localHost + '/api/user/validate', token, options)
+      .pipe(
+        map((data) => {
+          return data
+        })
+      )
+  }
+
+  details() {
+    let options = {headers: new HttpHeaders({'Content-Type': 'application/json'})}
+    return this.http.get<IUser>(this.localHost + '/api/user/details', options)
+      .pipe(
+        map((data) => {
+            if (data != null) {
+              return data
+            }
+            return catchError(this.handleError('user-details'))
+          }
+        )
       )
   }
 

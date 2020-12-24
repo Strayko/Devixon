@@ -10,36 +10,60 @@ namespace DevixonApi.Data.Helpers
 {
     public class TokenHelper
     {
-        // public static string GenerateSecureSecret()
-        // {
-        //     var hmac = new HMACSHA256();
-        //     return Convert.ToBase64String(hmac.Key);
-        // }
+        private static JwtSecurityTokenHandler _tokenHandler = new JwtSecurityTokenHandler();
+        private static byte[] _key = Bytes();
 
         public static string GenerateToken(User user)
         {
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Convert.FromBase64String(JwtCredentialsHelper.Secret);
-
             var claimsIdentity = new ClaimsIdentity(new[]
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim("IsBlocked", user.Blocked.ToString()), 
             });
             
-            var signingCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature);
+            var signingCredentials = new SigningCredentials(new SymmetricSecurityKey(_key), SecurityAlgorithms.HmacSha256Signature);
 
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = claimsIdentity,
                 Issuer = JwtCredentialsHelper.Issuer,
                 Audience = JwtCredentialsHelper.Audience,
-                Expires = DateTime.Now.AddMinutes(15),
+                Expires = DateTime.Now.AddMinutes(1),
                 SigningCredentials = signingCredentials,
             };
 
-            var token = tokenHandler.CreateToken(tokenDescriptor);
-            return tokenHandler.WriteToken(token);
+            var token = _tokenHandler.CreateToken(tokenDescriptor);
+            return _tokenHandler.WriteToken(token);
+        }
+
+        public static bool ValidateCurrentToken(Token token)
+        {
+            var signingKey = new SymmetricSecurityKey(_key);
+            
+            try
+            {
+                _tokenHandler.ValidateToken(token.name, new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidIssuer = JwtCredentialsHelper.Issuer,
+                    ValidAudience = JwtCredentialsHelper.Audience,
+                    IssuerSigningKey = signingKey
+                }, out SecurityToken validatedToken);
+            }
+            catch
+            {
+                return false;
+            }
+
+            return true;
+        }
+        
+        private static byte[] Bytes()
+        {
+            var key = Convert.FromBase64String(JwtCredentialsHelper.Secret);
+            return key;
         }
     }
 }
