@@ -11,10 +11,10 @@ export class LoginComponent implements OnInit{
   constructor(private userService: UserService, private router: Router) {
   }
 
+  invalidCredentials: boolean
   loginForm: FormGroup
   private email: FormControl
   private password: FormControl
-  invalidCredentials: string
 
   ngOnInit() {
     this.email = new FormControl(this.email, [Validators.required, Validators.pattern("^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$")]);
@@ -46,7 +46,9 @@ export class LoginComponent implements OnInit{
           this.router.navigate(['/'])
         }
       }, (error) => {
-        this.invalidCredentials = error['error']['errors']
+        if (error == 'Bad Request') {
+          this.invalidCredentials = true
+        }
       })
     }
   }

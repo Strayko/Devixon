@@ -4,25 +4,25 @@
       <a class="text-sm font-bold leading-relaxed inline-block mr-4 py-2 whitespace-no-wrap uppercase text-white" [routerLink]="['/']">
         Dashboard
       </a>
-      <button class="text-white cursor-pointer text-xl leading-none px-3 py-1 border border-solid border-transparent rounded bg-transparent block lg:hidden outline-none focus:outline-none" type="button" (click)="toggleNavbar()">
+      <button class="text-white cursor-pointer text-xl leading-none px-3 py-1 border border-solid border-transparent rounded bg-transparent block lg:hidden outline-none focus:outline-none" type="button">
         <i class="fas fa-bars"></i>
       </button>
     </div>
     <div class="lg:flex flex-grow items-center hidden" #examplecollapsenavbar>
       <ul class="flex flex-col lg:flex-row list-none lg:ml-auto">
-        <li class="nav-item">
-          <a class="px-3 py-2 flex items-center text-xs uppercase font-bold leading-snug text-white hover:opacity-75" href="#pablo">
-            <span class="ml-2">Share</span>
+        <li *ngIf="isAuthenticated()" class="nav-item">
+          <a class="px-3 py-2 flex items-center text-xs uppercase font-bold leading-snug text-white hover:opacity-75" [routerLink]="['/user/details']">
+            <span class="ml-2">User</span>
           </a>
         </li>
-        <li class="nav-item">
-          <a class="px-3 py-2 flex items-center text-xs uppercase font-bold leading-snug text-white hover:opacity-75" href="#pablo">
-            <span class="ml-2">Tweet</span>
+        <li *ngIf="isAuthenticated()" class="nav-item">
+          <a (click)="logout()" href="#" class="px-3 py-2 flex items-center text-xs uppercase font-bold leading-snug text-white hover:opacity-75">
+            <span class="ml-2">Logout</span>
           </a>
         </li>
-        <li class="nav-item">
-          <a class="px-3 py-2 flex items-center text-xs uppercase font-bold leading-snug text-white hover:opacity-75" href="#pablo">
-            <span class="ml-2">Pin</span>
+        <li *ngIf="!isAuthenticated()" class="nav-item">
+          <a [routerLink]="['/login']" class="px-3 py-2 flex items-center text-xs uppercase font-bold leading-snug text-white hover:opacity-75">
+            <span class="ml-2">Sign In</span>
           </a>
         </li>
       </ul>

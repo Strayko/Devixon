@@ -82,7 +82,7 @@ namespace DevixonApi.Controllers
         [Route("validate")]
         public IActionResult Validate(Token token)
         {
-            var validate = _userService.ValidateUser(token);
+            var validate = _userService.ValidateToken(token);
             if (validate) return Ok(new {success = "Token is valid."});
 
             return BadRequest(new {errors = "Token has expired."});

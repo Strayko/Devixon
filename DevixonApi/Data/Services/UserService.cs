@@ -52,7 +52,7 @@ namespace DevixonApi.Data.Services
             return await user.FirstOrDefaultAsync();
         }
 
-        public bool ValidateUser(Token token)
+        public bool ValidateToken(Token token)
         {
             var userToken = TokenHelper.ValidateCurrentToken(token);
             return userToken;

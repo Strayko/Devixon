@@ -6,6 +6,7 @@ import {ILoggedUser} from '../_interface/logged-user';
 import ApiParams from '../shared/api-params.json';
 import { IUser } from '../_interface/user-details';
 import {IToken} from '../_interface/token';
+import {Router} from '@angular/router';
 
 @Injectable()
 export class UserService {
@@ -13,7 +14,7 @@ export class UserService {
   private currentUserSubject: BehaviorSubject<ILoggedUser>
   public currentUser: Observable<ILoggedUser>
 
-  constructor(private http: HttpClient) {
+  constructor(private http: HttpClient, private router: Router) {
     this.currentUserSubject = new BehaviorSubject<ILoggedUser>(JSON.parse(localStorage.getItem('currentUser')))
     this.currentUser = this.currentUserSubject.asObservable()
   }
@@ -74,6 +75,7 @@ export class UserService {
   logout() {
     localStorage.removeItem('currentUser');
     this.currentUserSubject.next(null);
+    this.router.navigate(['/'])
   }
 
   private handleError<T> (operation = 'operation', result?: T) {
