@@ -1,6 +1,5 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
-
 import { AppComponent } from './dashboard/app.component';
 import { appRoutes } from './routes';
 import { RouterModule } from '@angular/router';
@@ -13,7 +12,7 @@ import { LoginComponent } from './login/login.component';
 import { NavComponent } from './nav/nav.component';
 import { DetailsComponent } from './user-details/details.component';
 import { JwtInterceptor } from './_helpers/jwt.interceptor';
-import {ErrorInterceptor} from './_helpers/error.interceptor';
+import { ErrorInterceptor } from './_helpers/error.interceptor';
 
 @NgModule({
   declarations: [

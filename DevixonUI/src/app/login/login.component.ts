@@ -46,7 +46,7 @@ export class LoginComponent implements OnInit{
           this.router.navigate(['/'])
         }
       }, (error) => {
-        if (error == 'Bad Request') {
+        if (error == 401) {
           this.invalidCredentials = true
         }
       })

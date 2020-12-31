@@ -43,7 +43,7 @@ namespace DevixonApi.Controllers
                     return Ok(loginResponse);
                 }
                 
-                return BadRequest(new {errors = "Invalid Credentials"});
+                return Unauthorized(new {errors = "Invalid Credentials"});
             }
 
             return BadRequest();

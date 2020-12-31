@@ -4,7 +4,7 @@ import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {catchError, map} from 'rxjs/operators';
 import {ILoggedUser} from '../_interface/logged-user';
 import ApiParams from '../shared/api-params.json';
-import { IUser } from '../_interface/user-details';
+import {IUser} from '../_interface/user-details';
 import {IToken} from '../_interface/token';
 import {Router} from '@angular/router';
 
