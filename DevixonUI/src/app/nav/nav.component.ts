@@ -8,6 +8,7 @@ import {ILoggedUser} from '../_interface/logged-user';
 })
 export class NavComponent{
   user: ILoggedUser
+  hiddenToggle = true
 
   constructor(private userService: UserService) {
     this.userService.currentUser.subscribe(x => this.user = x)
@@ -17,8 +18,11 @@ export class NavComponent{
     return !!this.user
   }
 
+  toggleClassHidden() {
+    this.hiddenToggle = !this.hiddenToggle
+  }
+
   logout() {
     this.userService.logout()
   }
-
 }

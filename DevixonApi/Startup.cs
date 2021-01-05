@@ -64,10 +64,17 @@ namespace DevixonApi
                     };
                 });
 
-                    services.AddDbContext<AppDbContext>(options =>
+            services.AddAuthentication().AddFacebook(options =>
+            {
+                options.AppId = "2959816677581090";
+                options.AppSecret = "519848fd68ab3d6725ef02285dbdd723";
+            });
+
+            services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IFacebookService, FacebookService>();
 
             services.AddControllers().AddNewtonsoftJson(options =>
                 options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);

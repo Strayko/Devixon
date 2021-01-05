@@ -59,7 +59,8 @@ export class RegistrationComponent implements OnInit{
     let uppercase = /(?=.*[A-Z])/.test(password)
     let lowercase = /(?=.*[a-z])/.test(password)
     let digit = /(?=.*\d)/.test(password)
-    return this.userValueComparison(password, uppercase, lowercase, digit);
+    let limitChar = /(?=.*[a-zA-Z]).{8,}/.test(password)
+    return this.userValueComparison(password, uppercase, lowercase, digit, limitChar);
   }
 
   checkPassword(userForm) {
@@ -96,25 +97,41 @@ export class RegistrationComponent implements OnInit{
     return false
   }
 
-  private userValueComparison(password, uppercase: boolean, lowercase: boolean, digit: boolean) {
+  private userValueComparison(password, uppercase: boolean, lowercase: boolean, digit: boolean, limitChar: boolean) {
     if (password == null) {
       return this.passwordRegexFilter = '';
-    } else if (uppercase && lowercase && digit) {
+    } else if (uppercase && lowercase && digit && limitChar) {
       return this.passwordRegexFilter = '';
-    } else if (uppercase && !lowercase && digit) {
+    } else if (uppercase && !lowercase && digit && limitChar) {
       return this.passwordRegexFilter = 'lowercase';
-    } else if (!uppercase && lowercase && digit) {
+    } else if (!uppercase && lowercase && digit && limitChar) {
       return this.passwordRegexFilter = 'uppercase';
-    } else if (!uppercase && !lowercase && digit) {
+    } else if (!uppercase && !lowercase && digit && limitChar) {
       return this.passwordRegexFilter = 'uppercase, lowercase';
-    } else if (uppercase && lowercase && !digit) {
+    } else if (uppercase && lowercase && !digit && limitChar) {
       return this.passwordRegexFilter = 'digit';
-    } else if (!uppercase && !lowercase && !digit) {
+    } else if (!uppercase && !lowercase && !digit && limitChar) {
       return this.passwordRegexFilter = 'uppercase, lowercase, digit';
-    } else if (uppercase && !lowercase && !digit) {
+    } else if (uppercase && !lowercase && !digit && limitChar) {
       return this.passwordRegexFilter = 'lowercase, digit';
-    } else if (!uppercase && lowercase && !digit) {
+    } else if (!uppercase && lowercase && !digit && limitChar) {
       return this.passwordRegexFilter = 'uppercase, digit';
+    } else if (!uppercase && lowercase && !digit && !limitChar) {
+      return this.passwordRegexFilter = 'uppercase, digit, max 8 char';
+    } else if (!uppercase && !lowercase && digit && !limitChar) {
+      return this.passwordRegexFilter = 'uppercase, lowercase, max 8 char';
+    } else if (!uppercase && lowercase && !digit && limitChar) {
+      return this.passwordRegexFilter = 'lowercase, digit, max 8 char';
+    } else if (uppercase && lowercase && !digit && !limitChar) {
+      return this.passwordRegexFilter = 'digit, max 8 char';
+    } else if (uppercase && !lowercase && digit && !limitChar) {
+      return this.passwordRegexFilter = 'lowercase, max 8 char';
+    } else if (!uppercase && lowercase && !digit && limitChar) {
+      return this.passwordRegexFilter = 'uppercase, max 8 char';
+    } else if (uppercase && lowercase && digit && !limitChar) {
+      return this.passwordRegexFilter = 'max 8 char';
+    } else if (!uppercase && !lowercase && !digit && !limitChar) {
+      return this.passwordRegexFilter = 'uppercase, lowercase, digit, max 8 char';
     }
   }
 }
