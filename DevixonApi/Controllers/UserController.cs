@@ -67,7 +67,6 @@ namespace DevixonApi.Controllers
         [Route("details")]
         public async Task<ActionResult<UserModel>> Details()
         {
-
             var userId = HttpContext.User.Claims.First().Value;
             if (userId == null) return BadRequest(new {errors = "User ID not found."});
             

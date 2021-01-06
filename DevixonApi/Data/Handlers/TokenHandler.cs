@@ -1,14 +1,13 @@
 ﻿using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Security.Cryptography;
 using DevixonApi.Data.Entities;
-using Microsoft.Extensions.Configuration;
+using DevixonApi.Data.Helpers;
 using Microsoft.IdentityModel.Tokens;
 
-namespace DevixonApi.Data.Helpers
+namespace DevixonApi.Data.Handlers
 {
-    public class TokenHelper
+    public class TokenHandler
     {
         private static JwtSecurityTokenHandler _tokenHandler = new JwtSecurityTokenHandler();
         private static byte[] _key = Bytes();
@@ -18,7 +17,7 @@ namespace DevixonApi.Data.Helpers
             var claimsIdentity = new ClaimsIdentity(new[]
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim("IsBlocked", user.Blocked.ToString()), 
+                new Claim("IsBlocked", user.Blocked.ToString()),
             });
             
             var signingCredentials = new SigningCredentials(new SymmetricSecurityKey(_key), SecurityAlgorithms.HmacSha256Signature);

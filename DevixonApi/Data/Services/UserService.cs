@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using DevixonApi.Data.Entities;
+using DevixonApi.Data.Handlers;
 using DevixonApi.Data.Helpers;
 using DevixonApi.Data.Interfaces;
 using DevixonApi.Data.Requests;
@@ -14,14 +15,10 @@ namespace DevixonApi.Data.Services
     public class UserService : IUserService
     {
         private readonly AppDbContext _appDbContext;
-        private readonly IFacebookService _facebookService;
-        private readonly JwtFacebookHandler _jwtFacebookHandler;
 
-        public UserService(AppDbContext appDbContext, IFacebookService facebookService, JwtFacebookHandler jwtFacebookHandler)
+        public UserService(AppDbContext appDbContext)
         {
             _appDbContext = appDbContext;
-            _facebookService = facebookService;
-            _jwtFacebookHandler = jwtFacebookHandler;
         }
 
         public async Task<LoggedUserResponse> Authenticate(LoginRequest loginRequest)
@@ -32,7 +29,7 @@ namespace DevixonApi.Data.Services
             var passwordHash = HashingHelper.HashUsingPbkdf2(loginRequest.Password, user.PasswordSalt);
             if (user.Password != passwordHash) return null;
 
-            var token = await Task.Run(() => TokenHelper.GenerateToken(user));
+            var token = await Task.Run(() => TokenHandler.GenerateToken(user));
 
             return LoggedUser(user, token);
         }
@@ -45,7 +42,7 @@ namespace DevixonApi.Data.Services
             var user = CreateUser(registerRequest, passwordHash, base64Encode);
             await _appDbContext.SaveChangesAsync();
             
-            var token = await Task.Run(() => TokenHelper.GenerateToken(user.Entity));
+            var token = await Task.Run(() => TokenHandler.GenerateToken(user.Entity));
 
             return LoggedUser(user.Entity, token);
         }
@@ -58,30 +55,10 @@ namespace DevixonApi.Data.Services
 
         public bool ValidateToken(Token token)
         {
-            var userToken = TokenHelper.ValidateCurrentToken(token);
+            var userToken = TokenHandler.ValidateCurrentToken(token);
             return userToken;
         }
-        
-        public async Task<AuthorizationFacebookTokenResponse> FacebookLoginAsync(
-            FacebookLoginRequest facebookLoginRequest)
-        {
-            if (string.IsNullOrEmpty(facebookLoginRequest.FacebookToken)) 
-                throw new Exception("Token is null or empty");
 
-            var facebookUser = await _facebookService.GetUserFromFacebookAsync(facebookLoginRequest.FacebookToken);
-            var domainUser = await _appDbContext.Users.SingleOrDefaultAsync(user => user.Email == facebookUser.Email);
-
-            return await CreateAccessTokens(domainUser);
-        }
-
-        public async Task<AuthorizationFacebookTokenResponse> CreateAccessTokens(User user)
-        {
-            var accessToken = _jwtFacebookHandler.CreateAccessToken(user.Id, user.Email);
-            var refreshToken = _jwtFacebookHandler.CreateRefreshToken(user.Id);
-
-            return new AuthorizationFacebookTokenResponse {AccessToken = accessToken, RefreshToken = refreshToken};
-        }
-        
         private static LoggedUserResponse LoggedUser(User user, string token)
         {
             return new LoggedUserResponse()

@@ -1,15 +1,16 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using AutoMapper.Configuration;
+using DevixonApi.Data.Helpers;
+using DevixonApi.Data.Interfaces;
 using DevixonApi.Data.Responses;
 using Microsoft.IdentityModel.Tokens;
 
-namespace DevixonApi.Data.Helpers
+namespace DevixonApi.Data.Handlers
 {
-    public class JwtFacebookHandler
+    public class JwtFacebookHandler : IJwtFacebookHandler
     {
         private readonly IConfiguration _configuration;
         private static byte[] _key = Bytes();
@@ -19,7 +20,12 @@ namespace DevixonApi.Data.Helpers
             _configuration = configuration;
         }
 
-        public FacebookTokenResponse CreateAccessToken(int userId, string email)
+        public JwtFacebookHandler()
+        {
+            
+        }
+
+        public FacebookTokenResponse CreateAccessToken(string userId, string email)
         {
             var now = DateTime.UtcNow;
             var claims = new Claim[]
@@ -33,14 +39,14 @@ namespace DevixonApi.Data.Helpers
 
             var signingCredentials = new SigningCredentials(new SymmetricSecurityKey(_key), SecurityAlgorithms.HmacSha256Signature);
 
-            var expiry = now.AddMinutes(10);
+            var expiry = now.AddMinutes(180);
             var jwt = CreateSecurityToken(claims, now, expiry, signingCredentials);
             var token = new JwtSecurityTokenHandler().WriteToken(jwt);
 
             return CreateTokenResource(token, expiry.ToShortTimeString());
         }
 
-        public FacebookTokenResponse CreateRefreshToken(int userId)
+        public FacebookTokenResponse CreateRefreshToken(string userId)
         {
             var now = DateTime.UtcNow;
             var claims = new Claim[]
@@ -52,7 +58,7 @@ namespace DevixonApi.Data.Helpers
             };
             
             var signingCredentials = new SigningCredentials(new SymmetricSecurityKey(_key), SecurityAlgorithms.HmacSha256Signature);
-            var expiry = now.AddMinutes(10);
+            var expiry = now.AddMinutes(180);
             var jwt = CreateSecurityToken(claims, now, expiry, signingCredentials);
             var token = new JwtSecurityTokenHandler().WriteToken(jwt);
 

@@ -26,12 +26,13 @@ namespace DevixonApi.Data.Services
         public async Task<FacebookLoginResponse> GetUserFromFacebookAsync(string facebookToken)
         {
             var result = await GetAsync<dynamic>(facebookToken, "me",
-                "fields=first_name,last_name,email,picture.width(100).height(100)");
+                "fields=id,first_name,last_name,email,picture.width(100).height(100)");
             
             if (result == null) throw new Exception("User from this token not exist");
 
             var user = new FacebookLoginResponse()
             {
+                Id = result.id,
                 FirstName = result.first_name,
                 LastName = result.last_name,
                 Email = result.email,
@@ -41,7 +42,7 @@ namespace DevixonApi.Data.Services
             return user;
         }
 
-        public async Task<T> GetAsync<T>(string accessToken, string endpoint, string args = null)
+        private async Task<T> GetAsync<T>(string accessToken, string endpoint, string args = null)
         {
             var response = await _httpClient.GetAsync($"{endpoint}?access_token={accessToken}&{args}");
 
