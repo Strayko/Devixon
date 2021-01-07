@@ -60,7 +60,7 @@ namespace DevixonApi.Data.Services
             var userToken = TokenHandler.ValidateCurrentToken(token);
             return userToken;
         }
-        
+
         public async Task<LoggedUserResponse> FacebookLoginAsync(
             FacebookLoginRequest facebookLoginRequest)
         {

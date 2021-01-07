@@ -48,6 +48,22 @@ export class UserService {
       )
   }
 
+  loginFacebook(token) {
+    let options = {headers: new HttpHeaders({'Content-Type': 'application/json'})}
+    return this.http.post<ILoggedUser>(this.localHost + '/api/facebook/login', token, options)
+      .pipe(
+        map((data) => {
+          if (data != null) {
+            localStorage.setItem('currentUser', JSON.stringify(data))
+            // @ts-ignore
+            this.currentUserSubject.next(data)
+            return data
+          }
+          return catchError(this.handleError('loginFacebookUser'))
+        })
+      )
+  }
+
   validate(token) {
     let options = {headers: new HttpHeaders({'Content-Type': 'application/json'})}
     return this.http.post<IToken>(this.localHost + '/api/user/validate', token, options)

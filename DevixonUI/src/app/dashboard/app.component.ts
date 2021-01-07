@@ -1,4 +1,6 @@
 import { Component } from '@angular/core';
+import {UserService} from '../shared/user.service';
+import {Router} from '@angular/router';
 
 @Component({
   selector: 'app-root',
@@ -6,4 +8,31 @@ import { Component } from '@angular/core';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
+  constructor(private userService: UserService, private router: Router) {
+  }
+
+  login() {
+    window['FB'].login((response) => {
+      let token = JSON.parse(`{"FacebookToken": "${response.authResponse.accessToken}"}`)
+      this.userService.loginFacebook(token).subscribe((data) => {
+        if (data != null) {
+          this.router.navigate(['/'])
+        }
+      }, (error) => {
+        console.log('User login failed: ' + error);
+      })
+      // if (response.authResponse) {
+      //   window['FB'].api('/me', {
+      //     fields: 'last_name, first_name, email'
+      //   }, (userInfo) => {
+      //
+      //     console.log("user information");
+      //     console.log(userInfo);
+      //   });
+      //
+      // } else {
+      //   console.log('User login failed');
+      // }
+    }, {scope: 'email'})
+  }
 }
