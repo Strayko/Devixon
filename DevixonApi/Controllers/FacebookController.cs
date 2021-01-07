@@ -10,19 +10,18 @@ namespace DevixonApi.Controllers
     [Route("api/[controller]")]
     public class FacebookController : ControllerBase
     {
-        private readonly IAccountFacebookService _accountFacebookService;
+        private readonly IUserService _userService;
 
-
-        public FacebookController(IAccountFacebookService accountFacebookService)
+        public FacebookController(IUserService userService)
         {
-            _accountFacebookService = accountFacebookService;
+            _userService = userService;
         }
 
         [HttpPost]
         [Route("login")]
         public async Task<IActionResult> FacebookLoginAsync([FromBody] FacebookLoginRequest facebookLoginRequest)
         {
-            var authorizationTokens = await _accountFacebookService.FacebookLoginAsync(facebookLoginRequest);
+            var authorizationTokens = await _userService.FacebookLoginAsync(facebookLoginRequest);
             if (authorizationTokens == null)
             {
                 return BadRequest(new {errors = "Invalid token!"});

@@ -10,6 +10,7 @@ namespace DevixonApi.Data.Entities
         public string Email { get; set; }
         public string Password { get; set; }
         public string PasswordSalt { get; set; }
+        public bool FacebookUser { get; set; }
         public bool Active { get; set; }
         public bool Blocked { get; set; }
         public DateTime TS { get; set; }
