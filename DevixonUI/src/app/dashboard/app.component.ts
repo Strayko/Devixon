@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import {UserService} from '../shared/user.service';
 import {Router} from '@angular/router';
+import {ILoggedUser} from '../_interface/logged-user';
 
 @Component({
   selector: 'app-root',
@@ -8,7 +9,14 @@ import {Router} from '@angular/router';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
+  user: ILoggedUser
+
   constructor(private userService: UserService, private router: Router) {
+    this.userService.currentUser.subscribe(x=>this.user = x)
+  }
+
+  isAuthenticated() {
+    return !!this.user
   }
 
   login() {
@@ -16,6 +24,7 @@ export class AppComponent {
       let token = JSON.parse(`{"FacebookToken": "${response.authResponse.accessToken}"}`)
       this.userService.loginFacebook(token).subscribe((data) => {
         if (data != null) {
+          location.reload(true)
           this.router.navigate(['/'])
         }
       }, (error) => {

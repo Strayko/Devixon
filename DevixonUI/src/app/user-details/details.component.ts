@@ -17,5 +17,4 @@ export class DetailsComponent implements OnInit{
       this.user = data
     })
   }
-
 }

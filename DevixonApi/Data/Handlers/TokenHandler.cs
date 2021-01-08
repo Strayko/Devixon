@@ -27,7 +27,7 @@ namespace DevixonApi.Data.Handlers
                 Subject = claimsIdentity,
                 Issuer = JwtCredentialsHelper.Issuer,
                 Audience = JwtCredentialsHelper.Audience,
-                Expires = DateTime.Now.AddMinutes(1),
+                Expires = DateTime.Now.AddDays(1),
                 SigningCredentials = signingCredentials,
             };
 
