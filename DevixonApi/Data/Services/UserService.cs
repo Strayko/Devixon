@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using DevixonApi.Data.Entities;
 using DevixonApi.Data.Handlers;
 using DevixonApi.Data.Helpers;
 using DevixonApi.Data.Interfaces;
+using DevixonApi.Data.Models;
 using DevixonApi.Data.Requests;
 using DevixonApi.Data.Responses;
 using Microsoft.EntityFrameworkCore;
@@ -16,11 +18,13 @@ namespace DevixonApi.Data.Services
     {
         private readonly AppDbContext _appDbContext;
         private readonly IFacebookService _facebookService;
+        private readonly IMapper _mapper;
 
-        public UserService(AppDbContext appDbContext, IFacebookService facebookService)
+        public UserService(AppDbContext appDbContext, IFacebookService facebookService, IMapper mapper)
         {
             _appDbContext = appDbContext;
             _facebookService = facebookService;
+            _mapper = mapper;
         }
 
         public async Task<LoggedUserResponse> Authenticate(LoginRequest loginRequest)
@@ -51,8 +55,29 @@ namespace DevixonApi.Data.Services
 
         public async Task<User> GetUserAsync(int userId)
         {
-            IQueryable<User> user = _appDbContext.Users.Where(u => u.Id == userId);
+            var user = _appDbContext.Users.Where(u => u.Id == userId);
             return await user.FirstOrDefaultAsync();
+        }
+
+        public async Task<User> UpdateUserAsync(UserModel userModel)
+        {
+            var user = _appDbContext.Users.SingleOrDefault(u => u.Id == userModel.Id);
+            if (user == null) return null;
+
+            user.FirstName = userModel.FirstName;
+            user.LastName = userModel.LastName;
+            user.Email = userModel.Email;
+            if (userModel.Password != "")
+            {
+                var base64Encode = Base64EncodeHelper.Generate(userModel.Password);
+                var passwordHash = HashingHelper.HashUsingPbkdf2(userModel.Password, base64Encode);
+                user.Password = passwordHash;
+            }
+                
+            await _appDbContext.SaveChangesAsync();
+            var getUser = GetUserAsync(userModel.Id);
+
+            return await getUser;
         }
         
         public bool ValidateToken(Token token)
@@ -61,8 +86,7 @@ namespace DevixonApi.Data.Services
             return userToken;
         }
 
-        public async Task<LoggedUserResponse> FacebookLoginAsync(
-            FacebookLoginRequest facebookLoginRequest)
+        public async Task<LoggedUserResponse> FacebookLoginAsync(FacebookLoginRequest facebookLoginRequest)
         {
             if (string.IsNullOrEmpty(facebookLoginRequest.FacebookToken)) 
                 throw new Exception("Token is null or empty");
@@ -74,18 +98,7 @@ namespace DevixonApi.Data.Services
             string token;
             if (applicationUser == null)
             {
-                var user = await _appDbContext.Users.AddAsync(new User
-                {
-                    FirstName = facebookUser.FirstName,
-                    LastName = facebookUser.LastName,
-                    Email = facebookUser.Email,
-                    Password = null,
-                    PasswordSalt = null,
-                    FacebookUser = true,
-                    Active = true,
-                    Blocked = false,
-                    TS = DateTime.Now
-                });
+                var user = await CreateFacebookUser(facebookUser);
                 await _appDbContext.SaveChangesAsync();
 
                 token = await Task.Run(() => TokenHandler.GenerateToken(user.Entity));
@@ -96,6 +109,23 @@ namespace DevixonApi.Data.Services
             token = await Task.Run(() => TokenHandler.GenerateToken(applicationUser));
             
             return LoggedUser(applicationUser, token);
+        }
+
+        private async Task<EntityEntry<User>> CreateFacebookUser(FacebookLoginResponse facebookUser)
+        {
+            var user = await _appDbContext.Users.AddAsync(new User
+            {
+                FirstName = facebookUser.FirstName,
+                LastName = facebookUser.LastName,
+                Email = facebookUser.Email,
+                Password = null,
+                PasswordSalt = null,
+                FacebookUser = true,
+                Active = true,
+                Blocked = false,
+                TS = DateTime.Now
+            });
+            return user;
         }
 
         private static LoggedUserResponse LoggedUser(User user, string token)

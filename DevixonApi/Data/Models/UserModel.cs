@@ -1,4 +1,5 @@
 ﻿using System;
+using AutoMapper;
 
 namespace DevixonApi.Data.Models
 {
@@ -8,6 +9,8 @@ namespace DevixonApi.Data.Models
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string Email { get; set; }
+        [IgnoreMap]
+        public string Password { get; set; }
         public DateTime TS { get; set; }
     }
 }

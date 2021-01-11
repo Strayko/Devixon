@@ -76,6 +76,19 @@ namespace DevixonApi.Controllers
             return _mapper.Map<UserModel>(user);
         }
 
+        [HttpPut]
+        [Route("update")]
+        public async Task<ActionResult<UserModel>> Update(UserModel userModel)
+        {
+            if (ModelState.IsValid)
+            {
+                var updateResponse = await _userService.UpdateUserAsync(userModel);
+                return _mapper.Map<UserModel>(updateResponse);  
+            }
+
+            return BadRequest();
+        }
+
         [HttpPost]
         [AllowAnonymous]
         [Route("validate")]
