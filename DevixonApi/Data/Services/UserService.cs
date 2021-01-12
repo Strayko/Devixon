@@ -18,13 +18,11 @@ namespace DevixonApi.Data.Services
     {
         private readonly AppDbContext _appDbContext;
         private readonly IFacebookService _facebookService;
-        private readonly IMapper _mapper;
 
-        public UserService(AppDbContext appDbContext, IFacebookService facebookService, IMapper mapper)
+        public UserService(AppDbContext appDbContext, IFacebookService facebookService)
         {
             _appDbContext = appDbContext;
             _facebookService = facebookService;
-            _mapper = mapper;
         }
 
         public async Task<LoggedUserResponse> Authenticate(LoginRequest loginRequest)
@@ -67,13 +65,15 @@ namespace DevixonApi.Data.Services
             user.FirstName = userModel.FirstName;
             user.LastName = userModel.LastName;
             user.Email = userModel.Email;
-            if (userModel.Password != "")
+            if (!string.IsNullOrEmpty(userModel.Password))
             {
                 var base64Encode = Base64EncodeHelper.Generate(userModel.Password);
                 var passwordHash = HashingHelper.HashUsingPbkdf2(userModel.Password, base64Encode);
-                user.Password = passwordHash;
-            }
                 
+                user.Password = passwordHash;
+                user.PasswordSalt = base64Encode;
+            }
+            
             await _appDbContext.SaveChangesAsync();
             var getUser = GetUserAsync(userModel.Id);
 

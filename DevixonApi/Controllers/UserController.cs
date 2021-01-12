@@ -80,13 +80,11 @@ namespace DevixonApi.Controllers
         [Route("update")]
         public async Task<ActionResult<UserModel>> Update(UserModel userModel)
         {
-            if (ModelState.IsValid)
-            {
-                var updateResponse = await _userService.UpdateUserAsync(userModel);
-                return _mapper.Map<UserModel>(updateResponse);  
-            }
-
-            return BadRequest();
+            if (!ModelState.IsValid) return BadRequest();
+            
+            var user = await _userService.UpdateUserAsync(userModel);
+            
+            return _mapper.Map<UserModel>(user);
         }
 
         [HttpPost]

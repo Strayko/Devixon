@@ -11,11 +11,6 @@ namespace DevixonApi.Data
         
         public DbSet<User> Users { get; set; }
 
-        public void SetModified(object entity)
-        {
-            Entry(entity).State = EntityState.Modified;
-        }
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<User>().ToTable("User");
