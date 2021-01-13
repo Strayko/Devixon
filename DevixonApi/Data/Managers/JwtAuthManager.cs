@@ -5,9 +5,9 @@ using DevixonApi.Data.Entities;
 using DevixonApi.Data.Helpers;
 using Microsoft.IdentityModel.Tokens;
 
-namespace DevixonApi.Data.Handlers
+namespace DevixonApi.Data.Managers
 {
-    public class TokenHandler
+    public static class JwtAuthManager
     {
         private static JwtSecurityTokenHandler _tokenHandler = new JwtSecurityTokenHandler();
         private static byte[] _key = Bytes();

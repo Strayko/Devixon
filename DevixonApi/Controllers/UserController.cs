@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -35,18 +36,16 @@ namespace DevixonApi.Controllers
         [Route("login")]
         public async Task<IActionResult> Login(LoginRequest loginRequest)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid) return BadRequest();
+            
+            var loginResponse = await _userService.Authenticate(loginRequest);
+            if (loginResponse != null)
             {
-                var loginResponse = await _userService.Authenticate(loginRequest);
-                if (loginResponse != null)
-                {
-                    return Ok(loginResponse);
-                }
-                
-                return Unauthorized(new {errors = "Invalid Credentials"});
+                return Ok(loginResponse);
             }
+                
+            return Unauthorized(new {errors = "Invalid Credentials"});
 
-            return BadRequest();
         }
         
         [HttpPost]
@@ -54,13 +53,11 @@ namespace DevixonApi.Controllers
         [Route("register")]
         public async Task<IActionResult> Register(RegisterRequest registerRequest)
         {
-            if (ModelState.IsValid)
-            {
-                var registerResponse = await _userService.Registration(registerRequest);
-                return Ok(registerResponse);
-            }
+            if (!ModelState.IsValid) return BadRequest();
+            
+            var registerResponse = await _userService.Registration(registerRequest);
+            return Ok(registerResponse);
 
-            return BadRequest();
         }
 
         [HttpGet]
@@ -81,6 +78,19 @@ namespace DevixonApi.Controllers
         public async Task<ActionResult<UserModel>> Update(UserModel userModel)
         {
             if (!ModelState.IsValid) return BadRequest();
+
+            var formCollection = await Request.ReadFormAsync();
+            var file = formCollection.Files.GetFile("image");
+            var folderName = Path.Combine("Resources", "Images");
+            var pathToSave = Path.Combine(Directory.GetCurrentDirectory(), folderName);
+
+            if (file.Length > 0)
+            {
+                var fileName = ContentDispositionHeaderValue.Parse(file.ContentDisposition).FileName.Trim('"');
+                var fullPath = Path.Combine(pathToSave, fileName);
+                var dbPath = Path.Combine(folderName, fileName);
+                // upload file
+            }
             
             var user = await _userService.UpdateUserAsync(userModel);
             

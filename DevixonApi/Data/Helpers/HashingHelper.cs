@@ -3,7 +3,7 @@ using System.Security.Cryptography;
 
 namespace DevixonApi.Data.Helpers
 {
-    public class HashingHelper
+    public static class HashingHelper
     {
         public static string HashUsingPbkdf2(string password, string salt)
         {

@@ -13,6 +13,7 @@ namespace DevixonApi.Data.Entities
         public bool FacebookUser { get; set; }
         public bool Active { get; set; }
         public bool Blocked { get; set; }
+        public Image Image { get; set; }
         public DateTime TS { get; set; }
     }
 }

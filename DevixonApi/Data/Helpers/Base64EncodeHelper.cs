@@ -1,6 +1,6 @@
 ﻿namespace DevixonApi.Data.Helpers
 {
-    public class Base64EncodeHelper
+    public static class Base64EncodeHelper
     {
         public static string Generate(string password)
         {

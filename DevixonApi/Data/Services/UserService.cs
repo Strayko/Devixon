@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
-using AutoMapper;
 using DevixonApi.Data.Entities;
-using DevixonApi.Data.Handlers;
 using DevixonApi.Data.Helpers;
 using DevixonApi.Data.Interfaces;
+using DevixonApi.Data.Managers;
 using DevixonApi.Data.Models;
 using DevixonApi.Data.Requests;
 using DevixonApi.Data.Responses;
@@ -33,20 +32,19 @@ namespace DevixonApi.Data.Services
             var passwordHash = HashingHelper.HashUsingPbkdf2(loginRequest.Password, user.PasswordSalt);
             if (user.Password != passwordHash) return null;
 
-            var token = await Task.Run(() => TokenHandler.GenerateToken(user));
+            var token = await Task.Run(() => JwtAuthManager.GenerateToken(user));
 
             return LoggedUser(user, token);
         }
 
         public async Task<LoggedUserResponse> Registration(RegisterRequest registerRequest)
         {
-            var base64Encode = Base64EncodeHelper.Generate(registerRequest.Password);
-            var passwordHash = HashingHelper.HashUsingPbkdf2(registerRequest.Password, base64Encode);
+            var base64Encode = PasswordHelper.EncodeAndHash(registerRequest.Password, out var passwordHash);
 
             var user = CreateUser(registerRequest, passwordHash, base64Encode);
             await _appDbContext.SaveChangesAsync();
             
-            var token = await Task.Run(() => TokenHandler.GenerateToken(user.Entity));
+            var token = await Task.Run(() => JwtAuthManager.GenerateToken(user.Entity));
 
             return LoggedUser(user.Entity, token);
         }
@@ -65,10 +63,10 @@ namespace DevixonApi.Data.Services
             user.FirstName = userModel.FirstName;
             user.LastName = userModel.LastName;
             user.Email = userModel.Email;
+
             if (!string.IsNullOrEmpty(userModel.Password))
             {
-                var base64Encode = Base64EncodeHelper.Generate(userModel.Password);
-                var passwordHash = HashingHelper.HashUsingPbkdf2(userModel.Password, base64Encode);
+                var base64Encode = PasswordHelper.EncodeAndHash(userModel.Password, out var passwordHash);
                 
                 user.Password = passwordHash;
                 user.PasswordSalt = base64Encode;
@@ -82,7 +80,7 @@ namespace DevixonApi.Data.Services
         
         public bool ValidateToken(Token token)
         {
-            var userToken = TokenHandler.ValidateCurrentToken(token);
+            var userToken = JwtAuthManager.ValidateCurrentToken(token);
             return userToken;
         }
 
@@ -101,12 +99,12 @@ namespace DevixonApi.Data.Services
                 var user = await CreateFacebookUser(facebookUser);
                 await _appDbContext.SaveChangesAsync();
 
-                token = await Task.Run(() => TokenHandler.GenerateToken(user.Entity));
+                token = await Task.Run(() => JwtAuthManager.GenerateToken(user.Entity));
 
                 return LoggedUser(user.Entity, token);
             }
 
-            token = await Task.Run(() => TokenHandler.GenerateToken(applicationUser));
+            token = await Task.Run(() => JwtAuthManager.GenerateToken(applicationUser));
             
             return LoggedUser(applicationUser, token);
         }
