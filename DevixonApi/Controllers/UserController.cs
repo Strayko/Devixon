@@ -4,7 +4,9 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Net.Mime;
 using System.Security.Claims;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using AutoMapper;
 using DevixonApi.Data.Entities;
@@ -13,6 +15,7 @@ using DevixonApi.Data.Models;
 using DevixonApi.Data.Requests;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DevixonApi.Controllers
@@ -67,30 +70,34 @@ namespace DevixonApi.Controllers
             var userId = HttpContext.User.Claims.First().Value;
             if (userId == null) return BadRequest(new {errors = "User ID not found."});
             
-            var user = await _userService.GetUserAsync(Int32.Parse(userId));
+            var user = await _userService.GetUserAsync(int.Parse(userId));
             if (user == null) return NotFound();
 
             return _mapper.Map<UserModel>(user);
         }
 
-        [HttpPut]
+        [HttpPut, DisableRequestSizeLimit]
         [Route("update")]
         public async Task<ActionResult<UserModel>> Update(UserModel userModel)
         {
             if (!ModelState.IsValid) return BadRequest();
 
-            var formCollection = await Request.ReadFormAsync();
-            var file = formCollection.Files.GetFile("image");
-            var folderName = Path.Combine("Resources", "Images");
-            var pathToSave = Path.Combine(Directory.GetCurrentDirectory(), folderName);
+            
 
-            if (file.Length > 0)
-            {
-                var fileName = ContentDispositionHeaderValue.Parse(file.ContentDisposition).FileName.Trim('"');
-                var fullPath = Path.Combine(pathToSave, fileName);
-                var dbPath = Path.Combine(folderName, fileName);
-                // upload file
-            }
+            
+            
+
+
+            // if (file.Length > 0)
+            // {
+            //     
+            //     
+            //
+            //     await using (var stream = new FileStream(fullPath, FileMode.Create))
+            //     {
+            //         await file.CopyToAsync(stream);
+            //     }
+            // }
             
             var user = await _userService.UpdateUserAsync(userModel);
             

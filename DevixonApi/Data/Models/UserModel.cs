@@ -14,7 +14,6 @@ namespace DevixonApi.Data.Models
         public string LastName { get; set; }
         [Required]
         [EmailAddress]
-        [EmailUserUnique]
         public string Email { get; set; }
         public string Image { get; set; }
         [IgnoreMap]

@@ -1,5 +1,7 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using DevixonApi.Data.Entities;
 using DevixonApi.Data.Helpers;
@@ -63,6 +65,29 @@ namespace DevixonApi.Data.Services
             user.FirstName = userModel.FirstName;
             user.LastName = userModel.LastName;
             user.Email = userModel.Email;
+            
+            
+            var imageOutput = userModel.Image;
+            var base64Image = imageOutput.Substring(imageOutput.IndexOf(",", StringComparison.Ordinal) + 1);
+            var base64Data = imageOutput.Substring(0, imageOutput.IndexOf(",", StringComparison.Ordinal));
+
+            var imageFormat = Regex.Match(base64Data, @"\b(jpeg|png|jpg)\b");
+            
+            var folderName = Path.Combine("Resources", "Images");
+            var pathToSave = Path.Combine(Directory.GetCurrentDirectory(), folderName);
+            var imageName = $"test.{imageFormat.Value}";
+
+            var imgPath = Path.Combine(pathToSave, imageName);
+            var imageBytes = Convert.FromBase64String(base64Image);
+            await File.WriteAllBytesAsync(imgPath, imageBytes);
+
+            var uploadedImage = await _appDbContext.Images.AddAsync(new Image { Name = imageName});
+            
+            await _appDbContext.SaveChangesAsync();
+            Console.WriteLine(uploadedImage);
+            Console.WriteLine(uploadedImage);
+
+            user.Image = uploadedImage.Entity.Id;
 
             if (!string.IsNullOrEmpty(userModel.Password))
             {
