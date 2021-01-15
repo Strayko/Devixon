@@ -26,6 +26,9 @@ namespace DevixonApi.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
@@ -47,6 +50,9 @@ namespace DevixonApi.Migrations
                     b.Property<bool>("Blocked")
                         .HasColumnType("bit");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Email")
                         .HasColumnType("nvarchar(max)");
 
@@ -67,9 +73,6 @@ namespace DevixonApi.Migrations
 
                     b.Property<string>("PasswordSalt")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("TS")
-                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 

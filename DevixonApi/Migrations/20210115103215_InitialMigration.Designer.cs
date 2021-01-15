@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DevixonApi.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20201211150544_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20210115103215_InitialMigration")]
+    partial class InitialMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -20,6 +20,24 @@ namespace DevixonApi.Migrations
                 .HasAnnotation("ProductVersion", "3.1.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+            modelBuilder.Entity("DevixonApi.Data.Entities.Image", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Images");
+                });
 
             modelBuilder.Entity("DevixonApi.Data.Entities.User", b =>
                 {
@@ -34,11 +52,20 @@ namespace DevixonApi.Migrations
                     b.Property<bool>("Blocked")
                         .HasColumnType("bit");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Email")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("FacebookUser")
+                        .HasColumnType("bit");
+
                     b.Property<string>("FirstName")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("ImageId")
+                        .HasColumnType("int");
 
                     b.Property<string>("LastName")
                         .HasColumnType("nvarchar(max)");
@@ -49,12 +76,18 @@ namespace DevixonApi.Migrations
                     b.Property<string>("PasswordSalt")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("TS")
-                        .HasColumnType("datetime2");
-
                     b.HasKey("Id");
 
+                    b.HasIndex("ImageId");
+
                     b.ToTable("User");
+                });
+
+            modelBuilder.Entity("DevixonApi.Data.Entities.User", b =>
+                {
+                    b.HasOne("DevixonApi.Data.Entities.Image", "Image")
+                        .WithMany()
+                        .HasForeignKey("ImageId");
                 });
 #pragma warning restore 612, 618
         }

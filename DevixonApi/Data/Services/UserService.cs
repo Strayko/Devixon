@@ -53,7 +53,9 @@ namespace DevixonApi.Data.Services
 
         public async Task<User> GetUserAsync(int userId)
         {
-            var user = _appDbContext.Users.Where(u => u.Id == userId);
+            var user = _appDbContext.Users.Where(u => u.Id == userId)
+                .Include(i=> i.Image);
+            
             return await user.FirstOrDefaultAsync();
         }
 
@@ -67,7 +69,7 @@ namespace DevixonApi.Data.Services
             user.Email = userModel.Email;
             
             
-            var imageOutput = userModel.Image;
+            var imageOutput = userModel.SetImage;
             var base64Image = imageOutput.Substring(imageOutput.IndexOf(",", StringComparison.Ordinal) + 1);
             var base64Data = imageOutput.Substring(0, imageOutput.IndexOf(",", StringComparison.Ordinal));
 
@@ -81,13 +83,16 @@ namespace DevixonApi.Data.Services
             var imageBytes = Convert.FromBase64String(base64Image);
             await File.WriteAllBytesAsync(imgPath, imageBytes);
 
-            var uploadedImage = await _appDbContext.Images.AddAsync(new Image { Name = imageName});
+            var uploadedImage = await _appDbContext.Images.AddAsync(
+                new Image
+                {
+                    Name = imageName,
+                    CreatedAt = DateTime.Now
+                });
             
             await _appDbContext.SaveChangesAsync();
-            Console.WriteLine(uploadedImage);
-            Console.WriteLine(uploadedImage);
 
-            user.Image = uploadedImage.Entity.Id;
+            user.ImageId = uploadedImage.Entity.Id;
 
             if (!string.IsNullOrEmpty(userModel.Password))
             {
@@ -146,7 +151,8 @@ namespace DevixonApi.Data.Services
                 FacebookUser = true,
                 Active = true,
                 Blocked = false,
-                TS = DateTime.Now
+                ImageId = null,
+                CreatedAt = DateTime.Now
             });
             return user;
         }
@@ -174,7 +180,8 @@ namespace DevixonApi.Data.Services
                 FacebookUser = false,
                 Active = true,
                 Blocked = false,
-                TS = DateTime.Now
+                ImageId = null,
+                CreatedAt = DateTime.Now
             });
             return user;
         }

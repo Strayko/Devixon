@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DevixonApi.Data.Entities
 {
@@ -13,7 +14,10 @@ namespace DevixonApi.Data.Entities
         public bool FacebookUser { get; set; }
         public bool Active { get; set; }
         public bool Blocked { get; set; }
+        [NotMapped]
+        [ForeignKey("ImageId")]
         public Image Image { get; set; }
-        public DateTime TS { get; set; }
+        public int? ImageId { get; set; }
+        public DateTime CreatedAt { get; set; }
     }
 }

@@ -16,8 +16,8 @@ namespace DevixonApi.Data.Models
                     => s.MapFrom(u => u.LastName))
                 .ForMember(d => d.Email, s
                     => s.MapFrom(u => u.Email))
-                .ForMember(d => d.TS, s
-                    => s.MapFrom(u => u.TS));
+                .ForMember(d => d.CreatedAt, s
+                    => s.MapFrom(u => u.CreatedAt));
         }
     }
 }
