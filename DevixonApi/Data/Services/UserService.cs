@@ -19,11 +19,13 @@ namespace DevixonApi.Data.Services
     {
         private readonly AppDbContext _appDbContext;
         private readonly IFacebookService _facebookService;
+        private readonly IImageService _imageService;
 
-        public UserService(AppDbContext appDbContext, IFacebookService facebookService)
+        public UserService(AppDbContext appDbContext, IFacebookService facebookService, IImageService imageService)
         {
             _appDbContext = appDbContext;
             _facebookService = facebookService;
+            _imageService = imageService;
         }
 
         public async Task<LoggedUserResponse> Authenticate(LoginRequest loginRequest)
@@ -68,32 +70,13 @@ namespace DevixonApi.Data.Services
             user.LastName = userModel.LastName;
             user.Email = userModel.Email;
             
+            var base64EncodeFormat = _imageService.Base64FormatExists(userModel.SetImage);
+            if (base64EncodeFormat.Success)
+            {
+                var uploadedImage = await _imageService.UploadedImage(userModel.SetImage);
+                user.ImageId = uploadedImage.Entity.Id;
+            }
             
-            var imageOutput = userModel.SetImage;
-            var base64Image = imageOutput.Substring(imageOutput.IndexOf(",", StringComparison.Ordinal) + 1);
-            var base64Data = imageOutput.Substring(0, imageOutput.IndexOf(",", StringComparison.Ordinal));
-
-            var imageFormat = Regex.Match(base64Data, @"\b(jpeg|png|jpg)\b");
-            
-            var folderName = Path.Combine("Resources", "Images");
-            var pathToSave = Path.Combine(Directory.GetCurrentDirectory(), folderName);
-            var imageName = $"test.{imageFormat.Value}";
-
-            var imgPath = Path.Combine(pathToSave, imageName);
-            var imageBytes = Convert.FromBase64String(base64Image);
-            await File.WriteAllBytesAsync(imgPath, imageBytes);
-
-            var uploadedImage = await _appDbContext.Images.AddAsync(
-                new Image
-                {
-                    Name = imageName,
-                    CreatedAt = DateTime.Now
-                });
-            
-            await _appDbContext.SaveChangesAsync();
-
-            user.ImageId = uploadedImage.Entity.Id;
-
             if (!string.IsNullOrEmpty(userModel.Password))
             {
                 var base64Encode = PasswordHelper.EncodeAndHash(userModel.Password, out var passwordHash);
@@ -106,12 +89,6 @@ namespace DevixonApi.Data.Services
             var getUser = GetUserAsync(userModel.Id);
 
             return await getUser;
-        }
-        
-        public bool ValidateToken(Token token)
-        {
-            var userToken = JwtAuthManager.ValidateCurrentToken(token);
-            return userToken;
         }
 
         public async Task<LoggedUserResponse> FacebookLoginAsync(FacebookLoginRequest facebookLoginRequest)
@@ -137,6 +114,12 @@ namespace DevixonApi.Data.Services
             token = await Task.Run(() => JwtAuthManager.GenerateToken(applicationUser));
             
             return LoggedUser(applicationUser, token);
+        }
+        
+        public bool ValidateToken(Token token)
+        {
+            var userToken = JwtAuthManager.ValidateCurrentToken(token);
+            return userToken;
         }
 
         private async Task<EntityEntry<User>> CreateFacebookUser(FacebookLoginResponse facebookUser)
