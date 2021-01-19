@@ -9,7 +9,7 @@ namespace DevixonApi.Tests
 {
     public class DbSetFaker
     {
-        public DbSet<T> ProvideQuerableDbSet<T>(Mock<DbSet<T>> mockSet, IQueryable<T> data) where T : class
+        public DbSet<T> ProvideQuerableDbData<T>(Mock<DbSet<T>> mockSet, IQueryable<T> data) where T : class
         {
             mockSet.As<IQueryable<T>>().Setup(b => b.Provider).Returns(data.Provider);
             mockSet.As<IQueryable<T>>().Setup(b => b.Expression).Returns(data.Expression);
@@ -19,6 +19,15 @@ namespace DevixonApi.Tests
         }
         
         public IQueryable<User> GetUser()
+        {
+            IQueryable<User> user = new List<User>
+            {
+                new User { Id = 1, FirstName = "Moamer", LastName = "Jusupovic", Email = "moamer@live.com", Password = "171wuM6+JTaYbYq9IOLKw3IxTwn5w3am8DLHrnB/I/k=", PasswordSalt = "bW9hbWVyMTIzIw==", FacebookUser = false, Active = true, Blocked = false, ImageId = 1, CreatedAt = DateTime.Now}
+            }.AsQueryable();
+            return user;
+        }
+        
+        public IQueryable<User> AddUser()
         {
             IQueryable<User> user = new List<User>
             {
