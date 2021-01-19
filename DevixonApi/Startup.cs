@@ -79,6 +79,7 @@ namespace DevixonApi
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IFacebookService, FacebookService>();
             services.AddScoped<IImageService, ImageService>();
+            services.AddScoped<IAppDbContext, AppDbContext>();
 
             services.AddControllers().AddNewtonsoftJson(options =>
                 options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);

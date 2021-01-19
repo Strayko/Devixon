@@ -17,11 +17,11 @@ namespace DevixonApi.Data.Services
 {
     public class UserService : IUserService
     {
-        private readonly AppDbContext _appDbContext;
+        private readonly IAppDbContext _appDbContext;
         private readonly IFacebookService _facebookService;
         private readonly IImageService _imageService;
 
-        public UserService(AppDbContext appDbContext, IFacebookService facebookService, IImageService imageService)
+        public UserService(IAppDbContext appDbContext, IFacebookService facebookService, IImageService imageService)
         {
             _appDbContext = appDbContext;
             _facebookService = facebookService;
@@ -86,9 +86,9 @@ namespace DevixonApi.Data.Services
             }
             
             await _appDbContext.SaveChangesAsync();
-            var getUser = GetUserAsync(userModel.Id);
+            var getUpdatedUser = GetUserAsync(userModel.Id);
 
-            return await getUser;
+            return await getUpdatedUser;
         }
 
         public async Task<LoggedUserResponse> FacebookLoginAsync(FacebookLoginRequest facebookLoginRequest)

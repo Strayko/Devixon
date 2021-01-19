@@ -11,9 +11,9 @@ namespace DevixonApi.Data.Services
 {
     public class ImageService : IImageService
     {
-        private readonly AppDbContext _appDbContext;
+        private readonly IAppDbContext _appDbContext;
 
-        public ImageService(AppDbContext appDbContext)
+        public ImageService(IAppDbContext appDbContext)
         {
             _appDbContext = appDbContext;
         }

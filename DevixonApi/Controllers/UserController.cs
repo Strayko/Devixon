@@ -82,23 +82,6 @@ namespace DevixonApi.Controllers
         {
             if (!ModelState.IsValid) return BadRequest();
 
-            
-
-            
-            
-
-
-            // if (file.Length > 0)
-            // {
-            //     
-            //     
-            //
-            //     await using (var stream = new FileStream(fullPath, FileMode.Create))
-            //     {
-            //         await file.CopyToAsync(stream);
-            //     }
-            // }
-            
             var user = await _userService.UpdateUserAsync(userModel);
             
             return _mapper.Map<UserModel>(user);
