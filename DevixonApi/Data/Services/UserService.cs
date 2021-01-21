@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -155,6 +156,7 @@ namespace DevixonApi.Data.Services
         {
             var user = _appDbContext.Users.Add(new User
             {
+                Id = 2,
                 FirstName = registerRequest.FirstName,
                 LastName = registerRequest.LastName,
                 Email = registerRequest.Email,
@@ -163,7 +165,7 @@ namespace DevixonApi.Data.Services
                 FacebookUser = false,
                 Active = true,
                 Blocked = false,
-                ImageId = null,
+                ImageId = 2,
                 CreatedAt = DateTime.Now
             });
             return user;
