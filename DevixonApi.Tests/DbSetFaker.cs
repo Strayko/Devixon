@@ -7,6 +7,9 @@ using DevixonApi.Data.Entities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Moq;
+using NSubstitute;
+using System.Data.Entity.Infrastructure;
+
 
 namespace DevixonApi.Tests
 {
@@ -21,17 +24,42 @@ namespace DevixonApi.Tests
             return mockSet.Object;
         }
         
-        public DbSet <T> GetQueryableMockDbSet <T> (List <T> sourceList) where T: class 
+        public DbSet <TEntity> GetQueryableMockDbSetForAsync <TEntity> (IEnumerable <TEntity> sourceList) where TEntity: class
         {
-            var queryable = sourceList.AsQueryable();
-            var dbSet = new Mock<DbSet<T>>();
-            dbSet.As<IQueryable<T>>().Setup(m => m.Provider).Returns(queryable.Provider);
-            dbSet.As<IQueryable<T>>().Setup(m => m.Expression).Returns(queryable.Expression);
-            dbSet.As<IQueryable<T>>().Setup(m => m.ElementType).Returns(queryable.ElementType);
-            dbSet.As<IQueryable<T>>().Setup(m => m.GetEnumerator()).Returns(() => queryable.GetEnumerator());
-            dbSet.Setup(d => d.Add(It.IsAny<T>())).Callback<T>((s) => sourceList.Add(s));
-            return dbSet.Object;
+            var queryable = sourceList as IQueryable<TEntity> ?? sourceList.AsQueryable();
+            var mockSet = Substitute.For<DbSet<TEntity>, IQueryable<TEntity>, IDbAsyncEnumerable<TEntity>>();
+            var castMockSet = (IQueryable<TEntity>) mockSet;
+            var castAsyncEnum = (IDbAsyncEnumerable<TEntity>) mockSet;
+
+            castAsyncEnum.GetAsyncEnumerator().Returns(new TestDbAsyncEnumerator<TEntity>(queryable.GetEnumerator()));
+            castMockSet.Provider.Returns(new TestDbAsyncQueryProvider<TEntity>(queryable.Provider));
+
+            castMockSet.Expression.Returns(queryable.Expression);
+            castMockSet.ElementType.Returns(queryable.ElementType);
+            castMockSet.GetEnumerator().Returns(queryable.GetEnumerator());
+            castMockSet.AsNoTracking().Returns(castMockSet);
+            mockSet.Include(Arg.Any<string>()).Returns(mockSet);
+
+            return mockSet;
         }
+        
+        public static void AddToDbSetForAsync<TEntity>(DbContext context, IEnumerable<TEntity> queryableEnumerable) where TEntity : class
+        {
+            var set = queryableEnumerable.
+            context.Set<TEntity>().Returns(set);
+        }
+        
+        // public DbSet <T> GetQueryableMockDbSet <T> (List <T> sourceList) where T: class 
+        // {
+        //     var queryable = sourceList.AsQueryable();
+        //     var dbSet = new Mock<DbSet<T>>();
+        //     dbSet.As<IQueryable<T>>().Setup(m => m.Provider).Returns(queryable.Provider);
+        //     dbSet.As<IQueryable<T>>().Setup(m => m.Expression).Returns(queryable.Expression);
+        //     dbSet.As<IQueryable<T>>().Setup(m => m.ElementType).Returns(queryable.ElementType);
+        //     dbSet.As<IQueryable<T>>().Setup(m => m.GetEnumerator()).Returns(() => queryable.GetEnumerator());
+        //     dbSet.Setup(d => d.Add(It.IsAny<T>())).Callback<T>((s) => sourceList.Add(s));
+        //     return dbSet.Object;
+        // }
         
         public IQueryable<User> GetUser()
         {

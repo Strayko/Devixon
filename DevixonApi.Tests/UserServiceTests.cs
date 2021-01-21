@@ -99,7 +99,7 @@ namespace DevixonApi.Tests
             var facebookService = new Mock<IFacebookService>();
             var imageService = new Mock<IImageService>();
             var dbSetFaker = new DbSetFaker();
-            appDbContext.Setup(u => u.Users).Returns(dbSetFaker.GetQueryableMockDbSet<User>(users));
+            appDbContext.Setup(u => u.Users).Returns(dbSetFaker.GetQueryableMockDbSetForAsync<User>(users));
             appDbContext.Setup(p => p.SaveChangesAsync()).ReturnsAsync(1);
 
             var userService = new UserService(appDbContext.Object, facebookService.Object, imageService.Object);
