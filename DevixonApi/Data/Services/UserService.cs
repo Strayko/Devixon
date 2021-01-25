@@ -31,7 +31,7 @@ namespace DevixonApi.Data.Services
 
         public async Task<LoggedUserResponse> Authenticate(LoginRequest loginRequest)
         {
-            var user = _appDbContext.Users.SingleOrDefault(user => user.Email == loginRequest.Email);
+            var user = await _appDbContext.Users.SingleOrDefaultAsync(user => user.Email == loginRequest.Email);
             if (user == null) return null;
             
             var passwordHash = HashingHelper.HashUsingPbkdf2(loginRequest.Password, user.PasswordSalt);
@@ -49,9 +49,9 @@ namespace DevixonApi.Data.Services
             var user = CreateUser(registerRequest, passwordHash, base64Encode);
             await _appDbContext.SaveChangesAsync();
             
-            var token = await Task.Run(() => JwtAuthManager.GenerateToken(user.Entity));
+            var token = await Task.Run(() => JwtAuthManager.GenerateToken(user.Result.Entity));
 
-            return LoggedUser(user.Entity, token);
+            return LoggedUser(user.Result.Entity, token);
         }
 
         public async Task<User> GetUserAsync(int userId)
@@ -152,11 +152,10 @@ namespace DevixonApi.Data.Services
             };
         }
         
-        private EntityEntry<User> CreateUser(RegisterRequest registerRequest, string passwordHash, string base64Encode)
+        private ValueTask<EntityEntry<User>> CreateUser(RegisterRequest registerRequest, string passwordHash, string base64Encode)
         {
-            var user = _appDbContext.Users.Add(new User
+            var user = _appDbContext.Users.AddAsync(new User
             {
-                Id = 2,
                 FirstName = registerRequest.FirstName,
                 LastName = registerRequest.LastName,
                 Email = registerRequest.Email,
@@ -165,7 +164,7 @@ namespace DevixonApi.Data.Services
                 FacebookUser = false,
                 Active = true,
                 Blocked = false,
-                ImageId = 2,
+                ImageId = null,
                 CreatedAt = DateTime.Now
             });
             return user;

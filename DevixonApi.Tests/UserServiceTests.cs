@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -9,7 +10,6 @@ using DevixonApi.Data.Interfaces;
 using DevixonApi.Data.Requests;
 using DevixonApi.Data.Responses;
 using DevixonApi.Data.Services;
-using Microsoft.EntityFrameworkCore;
 using Moq;
 using NUnit.Framework;
 
@@ -24,7 +24,7 @@ namespace DevixonApi.Tests
         private Mock<IImageService> _imageService;
         private DbSetFaker _dbSetFaker;
         private IQueryable<User> _data;
-        private Mock<DbSet<User>> _mockSet;
+        private Mock<Microsoft.EntityFrameworkCore.DbSet<User>> _mockSet;
         private UserService _userService;
 
         [SetUp]
@@ -35,7 +35,7 @@ namespace DevixonApi.Tests
             _imageService = new Mock<IImageService>();
             _dbSetFaker = new DbSetFaker();
             _data = _dbSetFaker.GetUser();
-            _mockSet = new Mock<DbSet<User>>();
+            _mockSet = new Mock<Microsoft.EntityFrameworkCore.DbSet<User>>();
             _dbSetFaker.ProvideQuerableDbData(_mockSet, _data);
             _appDbContext.Setup(u => u.Users).Returns(_mockSet.Object);
             _userService = new UserService(_appDbContext.Object, _facebookService.Object, _imageService.Object);
@@ -85,8 +85,14 @@ namespace DevixonApi.Tests
         [Test]
         public void WhenRegister_User_ReturnUserInfo()
         {
-            List<User> users = new List<User>();
+            // var users = Enumerable.Empty<User>().AsQueryable();
+            //
+            // var mockSet = new Mock<DbSet<User>>();
+            //
+            // mockSet.As<IAsyncEnumerable<User>>()
 
+            List<User> users = new List<User>();
+            
             var registerRequest = new RegisterRequest
             {
                 FirstName = "Damir",
@@ -99,9 +105,10 @@ namespace DevixonApi.Tests
             var facebookService = new Mock<IFacebookService>();
             var imageService = new Mock<IImageService>();
             var dbSetFaker = new DbSetFaker();
-            appDbContext.Setup(u => u.Users).Returns(dbSetFaker.GetQueryableMockDbSetForAsync<User>(users));
+            
+            appDbContext.Setup(u => u.Users).Returns(dbSetFaker.GetQueryableMockDbSet<User>(users));
             appDbContext.Setup(p => p.SaveChangesAsync()).ReturnsAsync(1);
-
+            
             var userService = new UserService(appDbContext.Object, facebookService.Object, imageService.Object);
             
             var createUser = userService.Registration(registerRequest);
