@@ -3,6 +3,7 @@ using DevixonApi.Data.Entities;
 using DevixonApi.Data.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
+
 namespace DevixonApi.Data
 {
     public class AppDbContext : DbContext, IAppDbContext

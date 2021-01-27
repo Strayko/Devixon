@@ -1,15 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
-using AutoMapper.QueryableExtensions;
 using DevixonApi.Data.Entities;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Moq;
-using NSubstitute;
-using System.Data.Entity.Infrastructure;
-using System.Linq.Expressions;
+
 
 
 namespace DevixonApi.Tests

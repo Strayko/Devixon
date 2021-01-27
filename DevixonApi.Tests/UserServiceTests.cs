@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.Entity;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
-using AutoMapper;
-using DevixonApi.Controllers;
+using DevixonApi.Data;
 using DevixonApi.Data.Entities;
 using DevixonApi.Data.Interfaces;
 using DevixonApi.Data.Requests;
 using DevixonApi.Data.Responses;
 using DevixonApi.Data.Services;
+using Microsoft.EntityFrameworkCore;
 using Moq;
 using NUnit.Framework;
 
@@ -22,24 +22,23 @@ namespace DevixonApi.Tests
         private Mock<IAppDbContext> _appDbContext;
         private Mock<IFacebookService> _facebookService;
         private Mock<IImageService> _imageService;
-        private DbSetFaker _dbSetFaker;
-        private IQueryable<User> _data;
-        private Mock<Microsoft.EntityFrameworkCore.DbSet<User>> _mockSet;
         private UserService _userService;
+        private List<User> _users;
 
         [SetUp]
         public void SetUp()
         {
+            _users = new List<User>
+            {
+                new User { Id = 1, FirstName = "Moamer", LastName = "Jusupovic", Email = "moamer@live.com", Password = "171wuM6+JTaYbYq9IOLKw3IxTwn5w3am8DLHrnB/I/k=", PasswordSalt = "bW9hbWVyMTIzIw==", FacebookUser = false, Active = true, Blocked = false, ImageId = 1, CreatedAt = DateTime.Now }
+            };
+            
             _appDbContext = new Mock<IAppDbContext>();
             _facebookService = new Mock<IFacebookService>();
             _imageService = new Mock<IImageService>();
-            _dbSetFaker = new DbSetFaker();
-            _data = _dbSetFaker.GetUser();
-            _mockSet = new Mock<Microsoft.EntityFrameworkCore.DbSet<User>>();
-            _dbSetFaker.ProvideQuerableDbData(_mockSet, _data);
-            _appDbContext.Setup(u => u.Users).Returns(_mockSet.Object);
+            _appDbContext.Setup(u => u.Users).Returns(DbSetExtensions.CreateMockedDbSet(_users));
             _userService = new UserService(_appDbContext.Object, _facebookService.Object, _imageService.Object);
-            
+
             _loginRequest = new LoginRequest
             {
                 Email = "moamer@live.com",
@@ -50,47 +49,41 @@ namespace DevixonApi.Tests
         [Test]
         public void WhenLogin_User_ReturnUserInfo()
         {
-            Task<LoggedUserResponse> user = _userService.Authenticate(_loginRequest);
+            var result = _userService.Authenticate(_loginRequest);
             
-            Assert.AreEqual("Moamer", user.Result.FirstName);
-            Assert.AreEqual("Jusupovic", user.Result.LastName);
-            Assert.AreEqual("moamer@live.com", user.Result.Email);
-            Assert.IsNotEmpty(user.Result.Token);
+            Assert.AreEqual("Moamer", result.Result.FirstName);
+            Assert.AreEqual("Jusupovic", result.Result.LastName);
+            Assert.AreEqual("moamer@live.com", result.Result.Email);
+            Assert.IsNotEmpty(result.Result.Token);
         }
 
         [Test]
         public void WhenLogin_User_ReturnNotFount()
         {
-            Task<LoggedUserResponse> user = _userService.Authenticate(new LoginRequest
+            var result = _userService.Authenticate(new LoginRequest
             {
                 Email = "moammer@live.com",
                 Password = "moamer123#"
             });
-            
-            Assert.IsNull(user.Result);
+
+            Assert.IsNull(result.Result);
         }
 
         [Test]
         public void WhenLogin_User_ReturnPasswordNotMatch()
         {
-            Task<LoggedUserResponse> user = _userService.Authenticate(new LoginRequest
+            var result = _userService.Authenticate(new LoginRequest
             {
                 Email = "moamer@live.com",
                 Password = "moamer1234##"
             });
-            
-            Assert.IsNull(user.Result);
+
+            Assert.IsNull(result.Result);
         }
 
         [Test]
         public void WhenRegister_User_ReturnUserInfo()
         {
-            // var users = Enumerable.Empty<User>().AsQueryable();
-            //
-            // var mockSet = new Mock<DbSet<User>>();
-            //
-            // mockSet.As<IAsyncEnumerable<User>>()
-
             List<User> users = new List<User>();
             
             var registerRequest = new RegisterRequest
@@ -104,16 +97,15 @@ namespace DevixonApi.Tests
             var appDbContext = new Mock<IAppDbContext>();
             var facebookService = new Mock<IFacebookService>();
             var imageService = new Mock<IImageService>();
-            var dbSetFaker = new DbSetFaker();
-            
-            appDbContext.Setup(u => u.Users).Returns(dbSetFaker.GetQueryableMockDbSet<User>(users));
+        
+            appDbContext.Setup(s => s.Users).Returns(DbSetExtensions.CreateMockedDbSet<User>(users));
             appDbContext.Setup(p => p.SaveChangesAsync()).ReturnsAsync(1);
-            
+
             var userService = new UserService(appDbContext.Object, facebookService.Object, imageService.Object);
+            var result = userService.Registration(registerRequest);
             
-            var createUser = userService.Registration(registerRequest);
-            Console.WriteLine(createUser);
-            Console.WriteLine(createUser);
+            Console.WriteLine(result);
+            Console.WriteLine(result);
         }
     }
 }

@@ -31,7 +31,7 @@ namespace DevixonApi.Data.Services
 
         public async Task<LoggedUserResponse> Authenticate(LoginRequest loginRequest)
         {
-            var user = await _appDbContext.Users.SingleOrDefaultAsync(user => user.Email == loginRequest.Email);
+            var user = await _appDbContext.Users.FirstOrDefaultAsync(user => user.Email == loginRequest.Email);
             if (user == null) return null;
             
             var passwordHash = HashingHelper.HashUsingPbkdf2(loginRequest.Password, user.PasswordSalt);
