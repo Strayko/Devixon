@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using DevixonApi.Data;
 using DevixonApi.Data.Entities;
 using DevixonApi.Data.Interfaces;
+using DevixonApi.Data.Managers;
 using DevixonApi.Data.Requests;
 using DevixonApi.Data.Responses;
 using DevixonApi.Data.Services;
@@ -28,15 +29,11 @@ namespace DevixonApi.Tests
         [SetUp]
         public void SetUp()
         {
-            _users = new List<User>
-            {
-                new User { Id = 1, FirstName = "Moamer", LastName = "Jusupovic", Email = "moamer@live.com", Password = "171wuM6+JTaYbYq9IOLKw3IxTwn5w3am8DLHrnB/I/k=", PasswordSalt = "bW9hbWVyMTIzIw==", FacebookUser = false, Active = true, Blocked = false, ImageId = 1, CreatedAt = DateTime.Now }
-            };
-            
             _appDbContext = new Mock<IAppDbContext>();
             _facebookService = new Mock<IFacebookService>();
             _imageService = new Mock<IImageService>();
-            _appDbContext.Setup(u => u.Users).Returns(DbSetExtensions.CreateMockedDbSet(_users));
+            _users = DbSetExtensions.InMemoryUsersData();
+            _appDbContext.Setup(u => u.Users).Returns(DbSetExtensions.CreateMockedDbSetAsync(_users));
             _userService = new UserService(_appDbContext.Object, _facebookService.Object, _imageService.Object);
 
             _loginRequest = new LoginRequest
@@ -84,7 +81,7 @@ namespace DevixonApi.Tests
         [Test]
         public void WhenRegister_User_ReturnUserInfo()
         {
-            List<User> users = new List<User>();
+            var users = new List<User>();
             
             var registerRequest = new RegisterRequest
             {
@@ -97,15 +94,16 @@ namespace DevixonApi.Tests
             var appDbContext = new Mock<IAppDbContext>();
             var facebookService = new Mock<IFacebookService>();
             var imageService = new Mock<IImageService>();
-        
-            appDbContext.Setup(s => s.Users).Returns(DbSetExtensions.CreateMockedDbSet<User>(users));
-            appDbContext.Setup(p => p.SaveChangesAsync()).ReturnsAsync(1);
 
+            appDbContext.Setup(s => s.Users).Returns(DbSetExtensions.CreateMockedDbSetAsync(users));
+            appDbContext.Setup(p => p.SaveChangesAsync(CancellationToken.None)).ReturnsAsync(1);
+        
             var userService = new UserService(appDbContext.Object, facebookService.Object, imageService.Object);
-            var result = userService.Registration(registerRequest);
+            userService.Registration(registerRequest);
             
-            Console.WriteLine(result);
-            Console.WriteLine(result);
+            appDbContext.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+            
+            
         }
     }
 }

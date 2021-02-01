@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using DevixonApi.Data.Entities;
 using DevixonApi.Data.Interfaces;
@@ -47,7 +48,7 @@ namespace DevixonApi.Data.Services
                     CreatedAt = DateTime.Now
                 });
 
-            await _appDbContext.SaveChangesAsync();
+            await _appDbContext.SaveChangesAsync(CancellationToken.None);
             return uploadedImage;
         }
     }

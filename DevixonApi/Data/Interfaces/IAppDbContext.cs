@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Threading;
+using System.Threading.Tasks;
 using DevixonApi.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,6 +9,6 @@ namespace DevixonApi.Data.Interfaces
     {
         DbSet<User> Users { get; set; }
         DbSet<Image> Images { get; set; }
-        Task<int> SaveChangesAsync();
+        Task<int> SaveChangesAsync(CancellationToken cancellationToken);
     }
 }

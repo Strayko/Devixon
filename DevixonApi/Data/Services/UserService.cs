@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using DevixonApi.Data.Entities;
 using DevixonApi.Data.Helpers;
@@ -47,7 +48,7 @@ namespace DevixonApi.Data.Services
             var base64Encode = PasswordHelper.EncodeAndHash(registerRequest.Password, out var passwordHash);
 
             var user = CreateUser(registerRequest, passwordHash, base64Encode);
-            await _appDbContext.SaveChangesAsync();
+            await _appDbContext.SaveChangesAsync(CancellationToken.None);
             
             var token = await Task.Run(() => JwtAuthManager.GenerateToken(user.Result.Entity));
 
@@ -86,7 +87,7 @@ namespace DevixonApi.Data.Services
                 user.PasswordSalt = base64Encode;
             }
             
-            await _appDbContext.SaveChangesAsync();
+            await _appDbContext.SaveChangesAsync(CancellationToken.None);
             var getUpdatedUser = GetUserAsync(userModel.Id);
 
             return await getUpdatedUser;
@@ -105,7 +106,7 @@ namespace DevixonApi.Data.Services
             if (applicationUser == null)
             {
                 var user = await CreateFacebookUser(facebookUser);
-                await _appDbContext.SaveChangesAsync();
+                await _appDbContext.SaveChangesAsync(CancellationToken.None);
 
                 token = await Task.Run(() => JwtAuthManager.GenerateToken(user.Entity));
 
@@ -152,9 +153,9 @@ namespace DevixonApi.Data.Services
             };
         }
         
-        private ValueTask<EntityEntry<User>> CreateUser(RegisterRequest registerRequest, string passwordHash, string base64Encode)
+        private async Task<EntityEntry<User>> CreateUser(RegisterRequest registerRequest, string passwordHash, string base64Encode)
         {
-            var user = _appDbContext.Users.AddAsync(new User
+            var user = await _appDbContext.Users.AddAsync(new User
             {
                 FirstName = registerRequest.FirstName,
                 LastName = registerRequest.LastName,
