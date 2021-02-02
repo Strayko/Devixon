@@ -32,7 +32,7 @@ namespace DevixonApi.Tests
                 .Returns(new AsyncQueryProvider<T>(queryable.Provider));
 
             mockSet.Setup(s => s.AddAsync(It.IsAny<T>(), It.IsAny<CancellationToken>()))
-                .Callback((T model, CancellationToken token) => { data.Add(model); })
+                .Callback<T,CancellationToken>((entity,cancellationToken) => {data.Add(entity);})
                 .Returns((T model, CancellationToken token) => new ValueTask<EntityEntry<T>>());
 
             mockSet.As<IQueryable<T>>().Setup(m => m.Expression).Returns(queryable.Expression);

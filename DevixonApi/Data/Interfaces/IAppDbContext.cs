@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using DevixonApi.Data.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace DevixonApi.Data.Interfaces
 {

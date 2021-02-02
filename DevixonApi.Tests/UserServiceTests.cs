@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -11,7 +12,9 @@ using DevixonApi.Data.Requests;
 using DevixonApi.Data.Responses;
 using DevixonApi.Data.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Moq;
+using NSubstitute;
 using NUnit.Framework;
 
 namespace DevixonApi.Tests
@@ -82,6 +85,7 @@ namespace DevixonApi.Tests
         public void WhenRegister_User_ReturnUserInfo()
         {
             var users = new List<User>();
+            IEnumerable<EntityEntry> entries = new List<EntityEntry>();
             
             var registerRequest = new RegisterRequest
             {
@@ -94,15 +98,18 @@ namespace DevixonApi.Tests
             var appDbContext = new Mock<IAppDbContext>();
             var facebookService = new Mock<IFacebookService>();
             var imageService = new Mock<IImageService>();
+            // var mockChangeTracker = new Mock<ChangeTracker>(MockBehavior.Strict, appDbContext.Object);
+            //
+            // mockChangeTracker.Setup(c => c.Entries()).Returns(entries);
+            // appDbContext.Setup(m => m.ChangeTracker).Returns(mockChangeTracker.Object);
 
             appDbContext.Setup(s => s.Users).Returns(DbSetExtensions.CreateMockedDbSetAsync(users));
-            appDbContext.Setup(p => p.SaveChangesAsync(CancellationToken.None)).ReturnsAsync(1);
-        
+            appDbContext.Setup(p => p.SaveChangesAsync(CancellationToken.None)).Returns(Task.FromResult(1));
+
             var userService = new UserService(appDbContext.Object, facebookService.Object, imageService.Object);
             userService.Registration(registerRequest);
             
             appDbContext.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
-            
             
         }
     }

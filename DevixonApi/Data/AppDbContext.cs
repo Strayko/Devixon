@@ -3,6 +3,8 @@ using System.Threading.Tasks;
 using DevixonApi.Data.Entities;
 using DevixonApi.Data.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 
 
 namespace DevixonApi.Data

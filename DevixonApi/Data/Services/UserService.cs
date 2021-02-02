@@ -32,7 +32,7 @@ namespace DevixonApi.Data.Services
 
         public async Task<LoggedUserResponse> Authenticate(LoginRequest loginRequest)
         {
-            var user = await _appDbContext.Users.FirstOrDefaultAsync(user => user.Email == loginRequest.Email);
+            var user = await _appDbContext.Users.FirstOrDefaultAsync(u => u.Email == loginRequest.Email);
             if (user == null) return null;
             
             var passwordHash = HashingHelper.HashUsingPbkdf2(loginRequest.Password, user.PasswordSalt);
@@ -50,7 +50,7 @@ namespace DevixonApi.Data.Services
             var user = CreateUser(registerRequest, passwordHash, base64Encode);
             await _appDbContext.SaveChangesAsync(CancellationToken.None);
             
-            var token = await Task.Run(() => JwtAuthManager.GenerateToken(user.Result.Entity));
+            var token = JwtAuthManager.GenerateToken(user.Result.Entity);
 
             return LoggedUser(user.Result.Entity, token);
         }
@@ -167,7 +167,7 @@ namespace DevixonApi.Data.Services
                 Blocked = false,
                 ImageId = null,
                 CreatedAt = DateTime.Now
-            });
+            }, CancellationToken.None);
             return user;
         }
     }
