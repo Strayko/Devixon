@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace DevixonApi.Tests
+namespace DevixonApi.Tests.AsyncSupport
 {
     public class AsyncEnumerator<T> : IAsyncEnumerator<T>
     {

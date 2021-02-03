@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Diagnostics;
-using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using DevixonApi.Data.Entities;
@@ -13,7 +10,6 @@ using DevixonApi.Data.Models;
 using DevixonApi.Data.Requests;
 using DevixonApi.Data.Responses;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace DevixonApi.Data.Services
 {
@@ -38,7 +34,7 @@ namespace DevixonApi.Data.Services
             var passwordHash = HashingHelper.HashUsingPbkdf2(loginRequest.Password, user.PasswordSalt);
             if (user.Password != passwordHash) return null;
 
-            var token = await Task.Run(() => JwtAuthManager.GenerateToken(user));
+            var token = JwtAuthManager.GenerateToken(user);
 
             return LoggedUser(user, token);
         }
@@ -47,12 +43,12 @@ namespace DevixonApi.Data.Services
         {
             var base64Encode = PasswordHelper.EncodeAndHash(registerRequest.Password, out var passwordHash);
 
-            var user = CreateUser(registerRequest, passwordHash, base64Encode);
+            var user = await CreateUser(registerRequest, passwordHash, base64Encode);
             await _appDbContext.SaveChangesAsync(CancellationToken.None);
             
-            var token = JwtAuthManager.GenerateToken(user.Result.Entity);
+            var token = JwtAuthManager.GenerateToken(user);
 
-            return LoggedUser(user.Result.Entity, token);
+            return LoggedUser(user, token);
         }
 
         public async Task<User> GetUserAsync(int userId)
@@ -73,10 +69,10 @@ namespace DevixonApi.Data.Services
             user.Email = userModel.Email;
             
             var base64EncodeFormat = _imageService.Base64FormatExists(userModel.SetImage);
-            if (base64EncodeFormat.Success)
+            if (base64EncodeFormat != null)
             {
                 var uploadedImage = await _imageService.UploadedImage(userModel.SetImage);
-                user.ImageId = uploadedImage.Entity.Id;
+                user.ImageId = uploadedImage.Id;
             }
             
             if (!string.IsNullOrEmpty(userModel.Password))
@@ -108,9 +104,9 @@ namespace DevixonApi.Data.Services
                 var user = await CreateFacebookUser(facebookUser);
                 await _appDbContext.SaveChangesAsync(CancellationToken.None);
 
-                token = await Task.Run(() => JwtAuthManager.GenerateToken(user.Entity));
+                token = await Task.Run(() => JwtAuthManager.GenerateToken(user));
 
-                return LoggedUser(user.Entity, token);
+                return LoggedUser(user, token);
             }
 
             token = await Task.Run(() => JwtAuthManager.GenerateToken(applicationUser));
@@ -124,9 +120,9 @@ namespace DevixonApi.Data.Services
             return userToken;
         }
 
-        private async Task<EntityEntry<User>> CreateFacebookUser(FacebookLoginResponse facebookUser)
+        private async Task<User> CreateFacebookUser(FacebookLoginResponse facebookUser)
         {
-            var user = await _appDbContext.Users.AddAsync(new User
+            var user = new User
             {
                 FirstName = facebookUser.FirstName,
                 LastName = facebookUser.LastName,
@@ -138,7 +134,9 @@ namespace DevixonApi.Data.Services
                 Blocked = false,
                 ImageId = null,
                 CreatedAt = DateTime.Now
-            });
+            };
+            await _appDbContext.Users.AddAsync(user, CancellationToken.None);
+
             return user;
         }
 
@@ -153,9 +151,9 @@ namespace DevixonApi.Data.Services
             };
         }
         
-        private async Task<EntityEntry<User>> CreateUser(RegisterRequest registerRequest, string passwordHash, string base64Encode)
+        private async Task<User> CreateUser(RegisterRequest registerRequest, string passwordHash, string base64Encode)
         {
-            var user = await _appDbContext.Users.AddAsync(new User
+            var user = new User
             {
                 FirstName = registerRequest.FirstName,
                 LastName = registerRequest.LastName,
@@ -167,7 +165,10 @@ namespace DevixonApi.Data.Services
                 Blocked = false,
                 ImageId = null,
                 CreatedAt = DateTime.Now
-            }, CancellationToken.None);
+            };
+            
+            await _appDbContext.Users.AddAsync(user, CancellationToken.None);
+            
             return user;
         }
     }

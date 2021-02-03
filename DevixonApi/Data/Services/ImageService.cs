@@ -23,10 +23,10 @@ namespace DevixonApi.Data.Services
         {
             var base64Data = imageOutput.Substring(0, imageOutput.IndexOf(",", StringComparison.Ordinal));
             var encodedFormat = Regex.Match(base64Data, @"\b(base64)\b");
-            return encodedFormat;
+            return encodedFormat.Success ? encodedFormat : null;
         }
 
-        public async Task<EntityEntry<Image>> UploadedImage(string imageOutput)
+        public async Task<Image> UploadedImage(string imageOutput)
         {
             var base64Image = imageOutput.Substring(imageOutput.IndexOf(",", StringComparison.Ordinal) + 1);
             var base64Data = imageOutput.Substring(0, imageOutput.IndexOf(",", StringComparison.Ordinal));
@@ -41,14 +41,15 @@ namespace DevixonApi.Data.Services
             var imageBytes = Convert.FromBase64String(base64Image);
             await File.WriteAllBytesAsync(imgPath, imageBytes);
 
-            var uploadedImage = await _appDbContext.Images.AddAsync(
-                new Image
+            var uploadedImage = new Image
                 {
                     Name = imageName,
                     CreatedAt = DateTime.Now
-                });
+                };
 
+            await _appDbContext.Images.AddAsync(uploadedImage, CancellationToken.None);
             await _appDbContext.SaveChangesAsync(CancellationToken.None);
+            
             return uploadedImage;
         }
     }

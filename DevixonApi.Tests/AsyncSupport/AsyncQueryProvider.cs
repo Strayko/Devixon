@@ -1,11 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore.Query.Internal;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore.Query.Internal;
 
-namespace DevixonApi.Tests
+namespace DevixonApi.Tests.AsyncSupport
 {
     public class AsyncQueryProvider<TEntity> : IAsyncQueryProvider
     {

@@ -8,6 +8,7 @@ using DevixonApi.Data;
 using DevixonApi.Data.Entities;
 using DevixonApi.Data.Interfaces;
 using DevixonApi.Data.Managers;
+using DevixonApi.Data.Models;
 using DevixonApi.Data.Requests;
 using DevixonApi.Data.Responses;
 using DevixonApi.Data.Services;
@@ -23,6 +24,7 @@ namespace DevixonApi.Tests
     public class UserServiceTests
     {
         private LoginRequest _loginRequest;
+        private RegisterRequest _registerRequest;
         private Mock<IAppDbContext> _appDbContext;
         private Mock<IFacebookService> _facebookService;
         private Mock<IImageService> _imageService;
@@ -44,73 +46,95 @@ namespace DevixonApi.Tests
                 Email = "moamer@live.com",
                 Password = "moamer123#"
             };
-        }
 
-        [Test]
-        public void WhenLogin_User_ReturnUserInfo()
-        {
-            var result = _userService.Authenticate(_loginRequest);
-            
-            Assert.AreEqual("Moamer", result.Result.FirstName);
-            Assert.AreEqual("Jusupovic", result.Result.LastName);
-            Assert.AreEqual("moamer@live.com", result.Result.Email);
-            Assert.IsNotEmpty(result.Result.Token);
-        }
-
-        [Test]
-        public void WhenLogin_User_ReturnNotFount()
-        {
-            var result = _userService.Authenticate(new LoginRequest
-            {
-                Email = "moammer@live.com",
-                Password = "moamer123#"
-            });
-
-            Assert.IsNull(result.Result);
-        }
-
-        [Test]
-        public void WhenLogin_User_ReturnPasswordNotMatch()
-        {
-            var result = _userService.Authenticate(new LoginRequest
-            {
-                Email = "moamer@live.com",
-                Password = "moamer1234##"
-            });
-
-            Assert.IsNull(result.Result);
-        }
-
-        [Test]
-        public void WhenRegister_User_ReturnUserInfo()
-        {
-            var users = new List<User>();
-            IEnumerable<EntityEntry> entries = new List<EntityEntry>();
-            
-            var registerRequest = new RegisterRequest
+            _registerRequest = new RegisterRequest
             {
                 FirstName = "Damir",
                 LastName = "Sauli",
                 Email = "damir@live.com",
                 Password = "damir123#"
             };
-            
-            var appDbContext = new Mock<IAppDbContext>();
-            var facebookService = new Mock<IFacebookService>();
-            var imageService = new Mock<IImageService>();
-            // var mockChangeTracker = new Mock<ChangeTracker>(MockBehavior.Strict, appDbContext.Object);
-            //
-            // mockChangeTracker.Setup(c => c.Entries()).Returns(entries);
-            // appDbContext.Setup(m => m.ChangeTracker).Returns(mockChangeTracker.Object);
+        }
 
-            appDbContext.Setup(s => s.Users).Returns(DbSetExtensions.CreateMockedDbSetAsync(users));
-            appDbContext.Setup(p => p.SaveChangesAsync(CancellationToken.None)).Returns(Task.FromResult(1));
+        [Test]
+        public async Task WhenLogin_User_ReturnUserInfo()
+        {
+            var result = await _userService.Authenticate(_loginRequest);
+            
+            Assert.AreEqual("Moamer", result.FirstName);
+            Assert.AreEqual("Jusupovic", result.LastName);
+            Assert.AreEqual("moamer@live.com", result.Email);
+            Assert.IsNotEmpty(result.Token);
+        }
 
-            var userService = new UserService(appDbContext.Object, facebookService.Object, imageService.Object);
-            userService.Registration(registerRequest);
+        [Test]
+        public async Task WhenLogin_User_ReturnNotFount()
+        {
+            var result = await _userService.Authenticate(new LoginRequest
+            {
+                Email = "moammer@live.com",
+                Password = "moamer123#"
+            });
+
+            Assert.IsNull(result);
+        }
+
+        [Test]
+        public async Task WhenLogin_User_ReturnPasswordNotMatch()
+        {
+            var result = await _userService.Authenticate(new LoginRequest
+            {
+                Email = "moamer@live.com",
+                Password = "moamer1234##"
+            });
+
+            Assert.IsNull(result);
+        }
+
+        [Test]
+        public async Task WhenRegister_User_ReturnUserInfo()
+        {
+            var result = await _userService.Registration(_registerRequest);
             
-            appDbContext.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+            _appDbContext.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
             
+            Assert.AreEqual("Damir", result.FirstName);
+            Assert.AreEqual("Sauli", result.LastName);
+            Assert.AreEqual("damir@live.com", result.Email);
+            Assert.IsNotEmpty(result.Token);
+        }
+
+        [Test]
+        public async Task WhenRequest_UserById_ReturnUser()
+        {
+            var user = _users.Find(u=>u.Id == 1);
+            
+            var result = await _userService.GetUserAsync(user.Id);
+            
+            Assert.AreEqual(user, result);
+        }
+
+        [Test]
+        public async Task WhenUpdate_User_ReturnUpdatedUser()
+        {
+            var userModel = new UserModel
+            {
+                Id = 1,
+                FirstName = "MoamerNew",
+                LastName = "JusupovicNew",
+                Email = "moamerNew@live.com",
+                SetImage = null,
+                Password = null
+            };
+
+            var result = await _userService.UpdateUserAsync(userModel);
+            
+            _appDbContext.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+            
+            Assert.AreEqual(userModel.Id, result.Id);
+            Assert.AreEqual(userModel.FirstName, result.FirstName);
+            Assert.AreEqual(userModel.LastName, result.LastName);
+            Assert.AreEqual(userModel.Email, result.Email);
         }
     }
 }

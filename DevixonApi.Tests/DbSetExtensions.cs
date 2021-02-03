@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using DevixonApi.Data.Entities;
+using DevixonApi.Tests.AsyncSupport;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace DevixonApi.Tests
