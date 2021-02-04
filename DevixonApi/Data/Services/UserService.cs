@@ -71,7 +71,8 @@ namespace DevixonApi.Data.Services
             var base64EncodeFormat = _imageService.Base64FormatExists(userModel.SetImage);
             if (base64EncodeFormat != null)
             {
-                var uploadedImage = await _imageService.UploadedImage(userModel.SetImage);
+                var imageName = await _imageService.UploadedImageOnFileSystem(userModel.SetImage);
+                
                 user.ImageId = uploadedImage.Id;
             }
             

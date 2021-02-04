@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -26,7 +27,7 @@ namespace DevixonApi.Data.Services
             return encodedFormat.Success ? encodedFormat : null;
         }
 
-        public async Task<Image> UploadedImage(string imageOutput)
+        public async Task<string> UploadedImageOnFileSystem(string imageOutput)
         {
             var base64Image = imageOutput.Substring(imageOutput.IndexOf(",", StringComparison.Ordinal) + 1);
             var base64Data = imageOutput.Substring(0, imageOutput.IndexOf(",", StringComparison.Ordinal));
@@ -41,16 +42,30 @@ namespace DevixonApi.Data.Services
             var imageBytes = Convert.FromBase64String(base64Image);
             await File.WriteAllBytesAsync(imgPath, imageBytes);
 
-            var uploadedImage = new Image
-                {
-                    Name = imageName,
-                    CreatedAt = DateTime.Now
-                };
-
-            await _appDbContext.Images.AddAsync(uploadedImage, CancellationToken.None);
-            await _appDbContext.SaveChangesAsync(CancellationToken.None);
+            // var uploadedImage = new Image
+            //     {
+            //         Name = imageName,
+            //         CreatedAt = DateTime.Now
+            //     };
+            //
+            // await _appDbContext.Images.AddAsync(uploadedImage, CancellationToken.None);
+            // await _appDbContext.SaveChangesAsync(CancellationToken.None);
             
-            return uploadedImage;
+            return imageName;
+        }
+
+        public async Task<Image> SaveImage(string imageName)
+        {
+            var image = new Image
+            {
+                Name = imageName,
+                CreatedAt = DateTime.Now
+            };
+
+            await _appDbContext.Images.AddAsync(image, CancellationToken.None);
+            await _appDbContext.SaveChangesAsync(CancellationToken.None);
+
+            return image;
         }
     }
 }

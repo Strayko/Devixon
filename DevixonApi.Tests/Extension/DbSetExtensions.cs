@@ -1,20 +1,21 @@
 ﻿using System;
-using Microsoft.EntityFrameworkCore;
-using Moq;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using DevixonApi.Data.Entities;
 using DevixonApi.Tests.AsyncSupport;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Moq;
 
-namespace DevixonApi.Tests
+namespace DevixonApi.Tests.Extension
 {
     public static class DbSetExtensions
     {
         private static List<User> _users;
-        
+        private static List<Image> _images;
+
         public static DbSet<T> CreateMockedDbSetAsync<T>(List<T> data) where T : class
         {
             return CreateMockFromDbSetAsync<T>(data).Object;
@@ -33,13 +34,13 @@ namespace DevixonApi.Tests
                 .Returns(new AsyncQueryProvider<T>(queryable.Provider));
 
             mockSet.Setup(s => s.AddAsync(It.IsAny<T>(), It.IsAny<CancellationToken>()))
-                .Callback<T,CancellationToken>((entity,cancellationToken) => {data.Add(entity);})
+                .Callback<T, CancellationToken>((entity, cancellationToken) => { data.Add(entity); })
                 .Returns((T model, CancellationToken token) => new ValueTask<EntityEntry<T>>());
 
             mockSet.As<IQueryable<T>>().Setup(m => m.Expression).Returns(queryable.Expression);
             mockSet.As<IQueryable<T>>().Setup(m => m.ElementType).Returns(queryable.ElementType);
             mockSet.As<IQueryable<T>>().Setup(m => m.GetEnumerator()).Returns(queryable.GetEnumerator());
-            
+
             return mockSet;
         }
 
@@ -55,6 +56,18 @@ namespace DevixonApi.Tests
                 }
             };
             return _users;
+        }
+
+        public static List<Image> InMemoryImagesData()
+        {
+            _images = new List<Image>
+            {
+                new Image
+                {
+                    Id = 1, Name = "picture.jpeg", CreatedAt = DateTime.Now
+                }
+            };
+            return _images;
         }
     }
 }

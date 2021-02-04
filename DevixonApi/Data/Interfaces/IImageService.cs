@@ -8,6 +8,7 @@ namespace DevixonApi.Data.Interfaces
     public interface IImageService
     {
         Match Base64FormatExists(string imageOutput);
-        Task<Image> UploadedImage(string imageOutput);
+        Task<string> UploadedImageOnFileSystem(string imageOutput);
+        Task<Image> SaveImage(string imageName);
     }
 }

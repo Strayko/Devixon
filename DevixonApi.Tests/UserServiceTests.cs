@@ -1,21 +1,13 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using DevixonApi.Data;
 using DevixonApi.Data.Entities;
 using DevixonApi.Data.Interfaces;
-using DevixonApi.Data.Managers;
 using DevixonApi.Data.Models;
 using DevixonApi.Data.Requests;
-using DevixonApi.Data.Responses;
 using DevixonApi.Data.Services;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
+using DevixonApi.Tests.Extension;
 using Moq;
-using NSubstitute;
 using NUnit.Framework;
 
 namespace DevixonApi.Tests
@@ -68,7 +60,7 @@ namespace DevixonApi.Tests
         }
 
         [Test]
-        public async Task WhenLogin_User_ReturnNotFount()
+        public async Task WhenLogin_User_ReturnEmailNotFount()
         {
             var result = await _userService.Authenticate(new LoginRequest
             {
@@ -124,7 +116,7 @@ namespace DevixonApi.Tests
                 LastName = "JusupovicNew",
                 Email = "moamerNew@live.com",
                 SetImage = null,
-                Password = null
+                Password = "newnew123#"
             };
 
             var result = await _userService.UpdateUserAsync(userModel);
@@ -135,6 +127,45 @@ namespace DevixonApi.Tests
             Assert.AreEqual(userModel.FirstName, result.FirstName);
             Assert.AreEqual(userModel.LastName, result.LastName);
             Assert.AreEqual(userModel.Email, result.Email);
+        }
+
+        [Test]
+        public async Task WhenUpdate_User_NotFoundById()
+        {
+            var userModel = new UserModel
+            {
+                Id = 2,
+                FirstName = "test",
+                LastName = "test",
+                Email = "test@livecom",
+                SetImage = null,
+                Password = null
+            };
+
+            var result = await _userService.UpdateUserAsync(userModel);
+            
+            Assert.IsNull(result);
+        }
+
+        [Test]
+        public async Task WhenUpdate_User_PasswordNotSet()
+        {
+            var user = _users.Find(u => u.Id == 1);
+            
+            var userModel = new UserModel
+            {
+                Id = 1,
+                FirstName = "test",
+                LastName = "test",
+                Email = "test@livecom",
+                SetImage = null,
+                Password = null
+            };
+
+            var result = await _userService.UpdateUserAsync(userModel);
+            _appDbContext.Verify(x=>x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+            
+            Assert.AreEqual(user.Password, result.Password);
         }
     }
 }
