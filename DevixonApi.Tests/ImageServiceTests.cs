@@ -14,17 +14,25 @@ namespace DevixonApi.Tests
     public class ImageServiceTests
     {
         [Test]
-        public async Task WhenUpload_Image_ReturnImage()
+        public void WhenSet_ImageBase64Format_ReturnTrue()
         {
-            var images = DbSetExtensions.InMemoryImagesData();
             var appDbContext = new Mock<IAppDbContext>();
-            
-            appDbContext.Setup(i => i.Images).Returns(DbSetExtensions.CreateMockedDbSetAsync(images));
-
             var imageService = new ImageService(appDbContext.Object);
-            var result = await imageService.UploadedImage(Base64ImageTestHelper.EncodeString);
-            Console.WriteLine(result);
-            Console.WriteLine(result);
+
+            var result = imageService.Base64FormatExists(Base64ImageTestHelper.EncodeString);
+            
+            Assert.AreEqual(true, result);
+        }
+
+        [Test]
+        public void WhenNotSet_ImageBase64Format_ReturnNull()
+        {
+            var appDbContext = new Mock<IAppDbContext>();
+            var imageService = new ImageService(appDbContext.Object);
+
+            var result = imageService.Base64FormatExists(Base64ImageTestHelper.FailedString);
+            
+            Assert.AreEqual(false, result);
         }
     }
 }

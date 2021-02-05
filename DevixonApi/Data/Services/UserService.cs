@@ -69,11 +69,11 @@ namespace DevixonApi.Data.Services
             user.Email = userModel.Email;
             
             var base64EncodeFormat = _imageService.Base64FormatExists(userModel.SetImage);
-            if (base64EncodeFormat != null)
+            if (base64EncodeFormat)
             {
                 var imageName = await _imageService.UploadedImageOnFileSystem(userModel.SetImage);
-                
-                user.ImageId = uploadedImage.Id;
+                var image = await _imageService.SaveImage(imageName);
+                user.ImageId = image.Id;
             }
             
             if (!string.IsNullOrEmpty(userModel.Password))

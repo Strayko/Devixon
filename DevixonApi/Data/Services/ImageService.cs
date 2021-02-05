@@ -20,11 +20,13 @@ namespace DevixonApi.Data.Services
             _appDbContext = appDbContext;
         }
         
-        public Match Base64FormatExists(string imageOutput)
+        public bool Base64FormatExists(string imageOutput)
         {
+            if (!imageOutput.Contains(",")) return false;
+            
             var base64Data = imageOutput.Substring(0, imageOutput.IndexOf(",", StringComparison.Ordinal));
             var encodedFormat = Regex.Match(base64Data, @"\b(base64)\b");
-            return encodedFormat.Success ? encodedFormat : null;
+            return encodedFormat.Success;
         }
 
         public async Task<string> UploadedImageOnFileSystem(string imageOutput)
@@ -42,15 +44,6 @@ namespace DevixonApi.Data.Services
             var imageBytes = Convert.FromBase64String(base64Image);
             await File.WriteAllBytesAsync(imgPath, imageBytes);
 
-            // var uploadedImage = new Image
-            //     {
-            //         Name = imageName,
-            //         CreatedAt = DateTime.Now
-            //     };
-            //
-            // await _appDbContext.Images.AddAsync(uploadedImage, CancellationToken.None);
-            // await _appDbContext.SaveChangesAsync(CancellationToken.None);
-            
             return imageName;
         }
 
