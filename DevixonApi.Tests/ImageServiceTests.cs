@@ -25,7 +25,7 @@ namespace DevixonApi.Tests
         }
 
         [Test]
-        public void WhenNotSet_ImageBase64Format_ReturnNull()
+        public void WhenNotSet_ImageBase64Format_ReturnFalse()
         {
             var appDbContext = new Mock<IAppDbContext>();
             var imageService = new ImageService(appDbContext.Object);

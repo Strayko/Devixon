@@ -3,10 +3,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using DevixonApi.Data.Entities;
 using DevixonApi.Data.Interfaces;
-using DevixonApi.Data.Models;
 using DevixonApi.Data.Requests;
 using DevixonApi.Data.Services;
 using DevixonApi.Tests.Extension;
+using DevixonApi.Tests.TestHelper;
 using Moq;
 using NUnit.Framework;
 
@@ -15,13 +15,13 @@ namespace DevixonApi.Tests
     [TestFixture]
     public class UserServiceTests
     {
-        private LoginRequest _loginRequest;
         private RegisterRequest _registerRequest;
         private Mock<IAppDbContext> _appDbContext;
         private Mock<IFacebookService> _facebookService;
         private Mock<IImageService> _imageService;
         private UserService _userService;
         private List<User> _users;
+        private UserHelper _userHelper;
 
         [SetUp]
         public void SetUp()
@@ -29,15 +29,10 @@ namespace DevixonApi.Tests
             _appDbContext = new Mock<IAppDbContext>();
             _facebookService = new Mock<IFacebookService>();
             _imageService = new Mock<IImageService>();
+            _userHelper = new UserHelper();
             _users = DbSetExtensions.InMemoryUsersData();
             _appDbContext.Setup(u => u.Users).Returns(DbSetExtensions.CreateMockedDbSetAsync(_users));
             _userService = new UserService(_appDbContext.Object, _facebookService.Object, _imageService.Object);
-
-            _loginRequest = new LoginRequest
-            {
-                Email = "moamer@live.com",
-                Password = "moamer123#"
-            };
 
             _registerRequest = new RegisterRequest
             {
@@ -49,51 +44,41 @@ namespace DevixonApi.Tests
         }
 
         [Test]
-        public async Task WhenLogin_User_ReturnUserInfo()
+        [TestCase("Moamer","Jusupovic","moamer@live.com")]
+        public async Task WhenLogin_User_ReturnUserInfo(string firstName, string lastName, string email)
         {
-            var result = await _userService.Authenticate(_loginRequest);
-            
-            Assert.AreEqual("Moamer", result.FirstName);
-            Assert.AreEqual("Jusupovic", result.LastName);
-            Assert.AreEqual("moamer@live.com", result.Email);
-            Assert.IsNotEmpty(result.Token);
+            var result = await _userService.Authenticate(_userHelper.Login("moamer@live.com", "moamer123#"));
+
+            _userHelper.AssertResult(firstName, lastName, email, result);
         }
 
         [Test]
-        public async Task WhenLogin_User_ReturnEmailNotFount()
+        [TestCase("moammer@live.com", "moamer123#")]
+        public async Task WhenLogin_User_ReturnEmailNotFount(string email, string password)
         {
-            var result = await _userService.Authenticate(new LoginRequest
-            {
-                Email = "moammer@live.com",
-                Password = "moamer123#"
-            });
+            var result = await _userService.Authenticate(_userHelper.Login(email, password));
 
             Assert.IsNull(result);
         }
 
         [Test]
-        public async Task WhenLogin_User_ReturnPasswordNotMatch()
+        [TestCase("moamer@live.com", "moamer1234##")]
+        public async Task WhenLogin_User_ReturnPasswordNotMatch(string email, string password)
         {
-            var result = await _userService.Authenticate(new LoginRequest
-            {
-                Email = "moamer@live.com",
-                Password = "moamer1234##"
-            });
+            var result = await _userService.Authenticate(_userHelper.Login(email, password));
 
             Assert.IsNull(result);
         }
 
         [Test]
-        public async Task WhenRegister_User_ReturnUserInfo()
+        [TestCase("Damir","Sauli","damir@live.com")]
+        public async Task WhenRegister_User_ReturnUserInfo(string firstName, string lastName, string email)
         {
             var result = await _userService.Registration(_registerRequest);
             
             _appDbContext.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
-            
-            Assert.AreEqual("Damir", result.FirstName);
-            Assert.AreEqual("Sauli", result.LastName);
-            Assert.AreEqual("damir@live.com", result.Email);
-            Assert.IsNotEmpty(result.Token);
+
+            _userHelper.AssertResult(firstName, lastName, email, result);
         }
 
         [Test]
@@ -109,18 +94,11 @@ namespace DevixonApi.Tests
         [Test]
         public async Task WhenUpdate_User_ReturnUpdatedUser()
         {
-            var userModel = new UserModel
-            {
-                Id = 1,
-                FirstName = "MoamerNew",
-                LastName = "JusupovicNew",
-                Email = "moamerNew@live.com",
-                SetImage = null,
-                Password = "newnew123#"
-            };
+            const string userValues = "1,MoamerNew,JusupovicNew,moamerNew@live.com,null,newnew123#";
+            var userModel = _userHelper.Model(userValues);
 
             var result = await _userService.UpdateUserAsync(userModel);
-            
+
             _appDbContext.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
             
             Assert.AreEqual(userModel.Id, result.Id);
@@ -132,15 +110,8 @@ namespace DevixonApi.Tests
         [Test]
         public async Task WhenUpdate_User_NotFoundById()
         {
-            var userModel = new UserModel
-            {
-                Id = 2,
-                FirstName = "test",
-                LastName = "test",
-                Email = "test@livecom",
-                SetImage = null,
-                Password = null
-            };
+            const string wrongUserIdValues = "2,test,test,test@live.com,null,null";
+            var userModel = _userHelper.Model(wrongUserIdValues);
 
             var result = await _userService.UpdateUserAsync(userModel);
             
@@ -152,15 +123,8 @@ namespace DevixonApi.Tests
         {
             var user = _users.Find(u => u.Id == 1);
             
-            var userModel = new UserModel
-            {
-                Id = 1,
-                FirstName = "test",
-                LastName = "test",
-                Email = "test@livecom",
-                SetImage = null,
-                Password = null
-            };
+            const string passwordNotSetValues = "1,test,test,test@live.com,null,null";
+            var userModel = _userHelper.Model(passwordNotSetValues);
 
             var result = await _userService.UpdateUserAsync(userModel);
             _appDbContext.Verify(x=>x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
