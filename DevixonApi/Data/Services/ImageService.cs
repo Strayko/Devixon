@@ -1,23 +1,24 @@
 ﻿using System;
 using System.Data;
 using System.IO;
+using System.IO.Abstractions;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using DevixonApi.Data.Entities;
 using DevixonApi.Data.Interfaces;
-using DevixonApi.Data.Models;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace DevixonApi.Data.Services
 {
     public class ImageService : IImageService
     {
         private readonly IAppDbContext _appDbContext;
+        private readonly IFile _file;
 
-        public ImageService(IAppDbContext appDbContext)
+        public ImageService(IAppDbContext appDbContext, IFile file)
         {
             _appDbContext = appDbContext;
+            _file = file;
         }
         
         public bool Base64FormatExists(string imageOutput)
@@ -42,7 +43,7 @@ namespace DevixonApi.Data.Services
 
             var imgPath = Path.Combine(pathToSave, imageName);
             var imageBytes = Convert.FromBase64String(base64Image);
-            await File.WriteAllBytesAsync(imgPath, imageBytes);
+            await _file.WriteAllBytesAsync(imgPath, imageBytes, CancellationToken.None);
 
             return imageName;
         }
