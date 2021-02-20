@@ -2,8 +2,10 @@
 using System.IO.Abstractions;
 using System.Threading;
 using System.Threading.Tasks;
+using DevixonApi.Data.Entities;
 using DevixonApi.Data.Interfaces;
 using DevixonApi.Data.Services;
+using DevixonApi.Tests.Extension;
 using DevixonApi.Tests.TestHelper;
 using Moq;
 using NUnit.Framework;
@@ -47,6 +49,24 @@ namespace DevixonApi.Tests
             
             mockFile.Verify(f=>f.File.WriteAllBytesAsync(It.IsAny<string>(), It.IsAny<byte[]>(), CancellationToken.None), Times.Once);
             Assert.AreEqual("test.jpeg", result);
+        }
+
+        [Test]
+        public async Task WhenSave_Image_ReturnImage()
+        {
+            var appDbContext = new Mock<IAppDbContext>();
+            var images = DbSetExtensions.InMemoryImagesData();
+            appDbContext.Setup(i => i.Images).Returns(DbSetExtensions.CreateMockedDbSetAsync(images));
+
+            var imageService = new ImageService(appDbContext.Object);
+
+            var result = await imageService.SaveImage("test.jpeg");
+            
+            appDbContext.Verify(i=>i.Images.AddAsync(It.IsAny<Image>(), CancellationToken.None), Times.Once);
+            appDbContext.Verify(i=>i.SaveChangesAsync(CancellationToken.None), Times.Once);
+            
+            var expected = images.Find(i => i.Name == "test.jpeg");
+            Assert.AreEqual(expected, result);
         }
     }
 }
