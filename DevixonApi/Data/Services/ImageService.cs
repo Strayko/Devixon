@@ -2,6 +2,7 @@
 using System.Data;
 using System.IO;
 using System.IO.Abstractions;
+using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,14 +14,12 @@ namespace DevixonApi.Data.Services
     public class ImageService : IImageService
     {
         private readonly IAppDbContext _appDbContext;
-        private readonly IFile _file;
 
-        public ImageService(IAppDbContext appDbContext, IFile file)
+        public ImageService(IAppDbContext appDbContext)
         {
             _appDbContext = appDbContext;
-            _file = file;
         }
-        
+
         public bool Base64FormatExists(string imageOutput)
         {
             if (!imageOutput.Contains(",")) return false;
@@ -28,24 +27,6 @@ namespace DevixonApi.Data.Services
             var base64Data = imageOutput.Substring(0, imageOutput.IndexOf(",", StringComparison.Ordinal));
             var encodedFormat = Regex.Match(base64Data, @"\b(base64)\b");
             return encodedFormat.Success;
-        }
-
-        public async Task<string> UploadedImageOnFileSystem(string imageOutput)
-        {
-            var base64Image = imageOutput.Substring(imageOutput.IndexOf(",", StringComparison.Ordinal) + 1);
-            var base64Data = imageOutput.Substring(0, imageOutput.IndexOf(",", StringComparison.Ordinal));
-
-            var imageFormat = Regex.Match(base64Data, @"\b(jpeg|png|jpg)\b");
-
-            var folderName = Path.Combine("Resources", "Images");
-            var pathToSave = Path.Combine(Directory.GetCurrentDirectory(), folderName);
-            var imageName = $"test.{imageFormat.Value}";
-
-            var imgPath = Path.Combine(pathToSave, imageName);
-            var imageBytes = Convert.FromBase64String(base64Image);
-            await _file.WriteAllBytesAsync(imgPath, imageBytes, CancellationToken.None);
-
-            return imageName;
         }
 
         public async Task<Image> SaveImage(string imageName)

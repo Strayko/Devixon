@@ -1,4 +1,5 @@
-﻿using System.IO.Abstractions;
+﻿using System;
+using System.IO.Abstractions;
 using System.Threading;
 using System.Threading.Tasks;
 using DevixonApi.Data.Interfaces;
@@ -16,13 +17,9 @@ namespace DevixonApi.Tests
         public void WhenSet_ImageBase64Format_ReturnTrue()
         {
             var appDbContext = new Mock<IAppDbContext>();
-            var mockFile = new Mock<IFile>();
-            mockFile.Setup(s=>s.WriteAllBytesAsync(It.IsAny<string>(), It.IsAny<byte[]>(), CancellationToken.None))
-                .Returns(Task.CompletedTask);
-            
-            var imageService = new ImageService(appDbContext.Object, mockFile.Object);
+            var imageService = new ImageService(appDbContext.Object);
 
-            var result = imageService.Base64FormatExists(Base64ImageTestHelper.EncodeString);
+            var result = imageService.Base64FormatExists(Base64ImageTestingHelper.EncodeString);
             
             Assert.AreEqual(true, result);
         }
@@ -31,13 +28,9 @@ namespace DevixonApi.Tests
         public void WhenNotSet_ImageBase64Format_ReturnFalse()
         {
             var appDbContext = new Mock<IAppDbContext>();
-            var mockFile = new Mock<IFile>();
-            mockFile.Setup(s=>s.WriteAllBytesAsync(It.IsAny<string>(), It.IsAny<byte[]>(), CancellationToken.None))
-                .Returns(Task.CompletedTask);
-            
-            var imageService = new ImageService(appDbContext.Object, mockFile.Object);
+            var imageService = new ImageService(appDbContext.Object);
 
-            var result = imageService.Base64FormatExists(Base64ImageTestHelper.FailedString);
+            var result = imageService.Base64FormatExists(Base64ImageTestingHelper.FailedString);
             
             Assert.AreEqual(false, result);
         }
@@ -45,16 +38,14 @@ namespace DevixonApi.Tests
         [Test]
         public async Task WhenUpload_ImageOnFileSystem_ReturnImageName()
         {
-            var appDbContext = new Mock<IAppDbContext>();
-            var mockFile = new Mock<IFile>();
-            mockFile.Setup(f => f.WriteAllBytesAsync(It.IsAny<string>(), It.IsAny<byte[]>(), CancellationToken.None))
+            var mockFile = new Mock<IFileSystem>();
+            mockFile.Setup(f => f.File.WriteAllBytesAsync(It.IsAny<string>(), It.IsAny<byte[]>(), CancellationToken.None))
                 .Returns(Task.CompletedTask);
-
-            var imageService = new ImageService(appDbContext.Object, mockFile.Object);
-            var result = await imageService.UploadedImageOnFileSystem(Base64ImageTestHelper.EncodeString);
             
-            mockFile.Verify(f=>f.WriteAllBytesAsync(It.IsAny<string>(), It.IsAny<byte[]>(), CancellationToken.None), Times.Once);
+            var fileSystemService = new FileSystemService(mockFile.Object);
+            var result = await fileSystemService.UploadImage(Base64ImageTestingHelper.EncodeString);
             
+            mockFile.Verify(f=>f.File.WriteAllBytesAsync(It.IsAny<string>(), It.IsAny<byte[]>(), CancellationToken.None), Times.Once);
             Assert.AreEqual("test.jpeg", result);
         }
     }

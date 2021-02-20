@@ -19,9 +19,10 @@ namespace DevixonApi.Tests
         private Mock<IAppDbContext> _appDbContext;
         private Mock<IFacebookService> _facebookService;
         private Mock<IImageService> _imageService;
+        private Mock<IFileSystemService> _fileSystemService;
         private UserService _userService;
         private List<User> _users;
-        private UserHelper _userHelper;
+        private UserTestingHelper _userTestingHelper;
 
         [SetUp]
         public void SetUp()
@@ -29,10 +30,15 @@ namespace DevixonApi.Tests
             _appDbContext = new Mock<IAppDbContext>();
             _facebookService = new Mock<IFacebookService>();
             _imageService = new Mock<IImageService>();
-            _userHelper = new UserHelper();
+            _fileSystemService = new Mock<IFileSystemService>();
+            _userTestingHelper = new UserTestingHelper();
             _users = DbSetExtensions.InMemoryUsersData();
             _appDbContext.Setup(u => u.Users).Returns(DbSetExtensions.CreateMockedDbSetAsync(_users));
-            _userService = new UserService(_appDbContext.Object, _facebookService.Object, _imageService.Object);
+            _userService = new UserService(
+                _appDbContext.Object, 
+                _facebookService.Object, 
+                _imageService.Object, 
+                _fileSystemService.Object);
 
             _registerRequest = new RegisterRequest
             {
@@ -47,16 +53,16 @@ namespace DevixonApi.Tests
         [TestCase("Moamer","Jusupovic","moamer@live.com")]
         public async Task WhenLogin_User_ReturnUserInfo(string firstName, string lastName, string email)
         {
-            var result = await _userService.Authenticate(_userHelper.Login("moamer@live.com", "moamer123#"));
+            var result = await _userService.Authenticate(_userTestingHelper.Login("moamer@live.com", "moamer123#"));
 
-            _userHelper.AssertResult(firstName, lastName, email, result);
+            _userTestingHelper.AssertResult(firstName, lastName, email, result);
         }
 
         [Test]
         [TestCase("moammer@live.com", "moamer123#")]
         public async Task WhenLogin_User_ReturnEmailNotFount(string email, string password)
         {
-            var result = await _userService.Authenticate(_userHelper.Login(email, password));
+            var result = await _userService.Authenticate(_userTestingHelper.Login(email, password));
 
             Assert.IsNull(result);
         }
@@ -65,7 +71,7 @@ namespace DevixonApi.Tests
         [TestCase("moamer@live.com", "moamer1234##")]
         public async Task WhenLogin_User_ReturnPasswordNotMatch(string email, string password)
         {
-            var result = await _userService.Authenticate(_userHelper.Login(email, password));
+            var result = await _userService.Authenticate(_userTestingHelper.Login(email, password));
 
             Assert.IsNull(result);
         }
@@ -78,7 +84,7 @@ namespace DevixonApi.Tests
             
             _appDbContext.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
 
-            _userHelper.AssertResult(firstName, lastName, email, result);
+            _userTestingHelper.AssertResult(firstName, lastName, email, result);
         }
 
         [Test]
@@ -95,7 +101,7 @@ namespace DevixonApi.Tests
         public async Task WhenUpdate_User_ReturnUpdatedUser()
         {
             const string userValues = "1,MoamerNew,JusupovicNew,moamerNew@live.com,null,newnew123#";
-            var userModel = _userHelper.Model(userValues);
+            var userModel = _userTestingHelper.Model(userValues);
 
             var result = await _userService.UpdateUserAsync(userModel);
 
@@ -111,7 +117,7 @@ namespace DevixonApi.Tests
         public async Task WhenUpdate_User_NotFoundById()
         {
             const string wrongUserIdValues = "2,test,test,test@live.com,null,null";
-            var userModel = _userHelper.Model(wrongUserIdValues);
+            var userModel = _userTestingHelper.Model(wrongUserIdValues);
 
             var result = await _userService.UpdateUserAsync(userModel);
             
@@ -124,7 +130,7 @@ namespace DevixonApi.Tests
             var user = _users.Find(u => u.Id == 1);
             
             const string passwordNotSetValues = "1,test,test,test@live.com,null,null";
-            var userModel = _userHelper.Model(passwordNotSetValues);
+            var userModel = _userTestingHelper.Model(passwordNotSetValues);
 
             var result = await _userService.UpdateUserAsync(userModel);
             _appDbContext.Verify(x=>x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);

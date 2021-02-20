@@ -2,6 +2,9 @@
 	<s:String x:Key="/Default/Environment/AssemblyExplorer/XmlDocument/@EntryValue">&lt;AssemblyExplorer&gt;&#xD;
   &lt;Assembly Path="C:\Users\moame\.nuget\packages\nsubstitute\4.2.2\lib\netstandard2.0\NSubstitute.dll" /&gt;&#xD;
   &lt;Assembly Path="C:\Users\moame\.nuget\packages\microsoft.entityframeworkcore\3.1.0\lib\netstandard2.0\Microsoft.EntityFrameworkCore.dll" /&gt;&#xD;
+  &lt;Assembly Path="C:\Users\moame\.nuget\packages\system.io.abstractions\12.0.1\lib\netstandard2.1\System.IO.Abstractions.dll" /&gt;&#xD;
+  &lt;Assembly Path="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\3.1.0\ref\netcoreapp3.1\System.IO.FileSystem.dll" /&gt;&#xD;
+  &lt;Assembly Path="C:\Users\moame\.nuget\packages\system.io.abstractions.testinghelpers\12.0.1\lib\netstandard2.1\System.IO.Abstractions.TestingHelpers.dll" /&gt;&#xD;
 &lt;/AssemblyExplorer&gt;</s:String>
 	<s:String x:Key="/Default/Environment/Highlighting/HighlightingSourceSnapshotLocation/@EntryValue">C:\Users\moame\AppData\Local\Temp\JetBrains\Rider\vAny\CoverageData\_DevixonApi.662291504\Snapshot\snapshot.utdcvr</s:String>
 	

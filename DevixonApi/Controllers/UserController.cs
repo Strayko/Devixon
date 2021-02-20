@@ -1,21 +1,11 @@
-﻿using System;
-using System.IO;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Net.Mime;
-using System.Security.Claims;
-using System.Text.RegularExpressions;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using DevixonApi.Data.Entities;
 using DevixonApi.Data.Interfaces;
 using DevixonApi.Data.Models;
 using DevixonApi.Data.Requests;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DevixonApi.Controllers

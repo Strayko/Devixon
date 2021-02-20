@@ -5,7 +5,7 @@ using NUnit.Framework;
 
 namespace DevixonApi.Tests.TestHelper
 {
-    public class UserHelper
+    public class UserTestingHelper
     {
         public LoginRequest Login(string email, string password)
         {

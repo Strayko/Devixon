@@ -18,12 +18,18 @@ namespace DevixonApi.Data.Services
         private readonly IAppDbContext _appDbContext;
         private readonly IFacebookService _facebookService;
         private readonly IImageService _imageService;
+        private readonly IFileSystemService _fileSystemService;
 
-        public UserService(IAppDbContext appDbContext, IFacebookService facebookService, IImageService imageService)
+        public UserService(
+            IAppDbContext appDbContext,
+            IFacebookService facebookService, 
+            IImageService imageService,
+            IFileSystemService fileSystemService)
         {
             _appDbContext = appDbContext;
             _facebookService = facebookService;
             _imageService = imageService;
+            _fileSystemService = fileSystemService;
         }
 
         public async Task<LoggedUserResponse> Authenticate(LoginRequest loginRequest)
@@ -71,7 +77,7 @@ namespace DevixonApi.Data.Services
             var base64EncodeFormat = _imageService.Base64FormatExists(userModel.SetImage);
             if (base64EncodeFormat)
             {
-                var imageName = await _imageService.UploadedImageOnFileSystem(userModel.SetImage);
+                var imageName = await _fileSystemService.UploadImage(userModel.SetImage);
                 var image = await _imageService.SaveImage(imageName);
                 user.ImageId = image.Id;
             }

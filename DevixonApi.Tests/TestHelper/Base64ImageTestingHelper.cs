@@ -1,6 +1,6 @@
 ﻿namespace DevixonApi.Tests.TestHelper
 {
-    public static class Base64ImageTestHelper
+    public static class Base64ImageTestingHelper
     {
         public const string FailedString = "testString";
         

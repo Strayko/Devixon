@@ -1,7 +1,6 @@
 ﻿using System.Threading.Tasks;
 using DevixonApi.Data.Interfaces;
 using DevixonApi.Data.Requests;
-using DevixonApi.Data.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DevixonApi.Controllers
