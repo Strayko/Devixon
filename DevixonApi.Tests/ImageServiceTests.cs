@@ -1,5 +1,4 @@
-﻿using System;
-using System.IO.Abstractions;
+﻿using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using DevixonApi.Data.Entities;
@@ -15,13 +14,23 @@ namespace DevixonApi.Tests
     [TestFixture]
     public class ImageServiceTests
     {
+        private Mock<IAppDbContext> _appDbContext;
+        private ImageService _imageService;
+        private List<Image> _images;
+
+        [SetUp]
+        public void SetUp()
+        {
+            _appDbContext = new Mock<IAppDbContext>();
+            _imageService = new ImageService(_appDbContext.Object);
+            _images = DbSetExtensions.InMemoryImagesData();
+            _appDbContext.Setup(i => i.Images).Returns(DbSetExtensions.CreateMockedDbSetAsync(_images));
+        }
+        
         [Test]
         public void WhenSet_ImageBase64Format_ReturnTrue()
         {
-            var appDbContext = new Mock<IAppDbContext>();
-            var imageService = new ImageService(appDbContext.Object);
-
-            var result = imageService.Base64FormatExists(Base64ImageTestingHelper.EncodeString);
+            var result = _imageService.Base64FormatExists(Base64ImageTestingHelper.EncodeString);
             
             Assert.AreEqual(true, result);
         }
@@ -29,43 +38,20 @@ namespace DevixonApi.Tests
         [Test]
         public void WhenNotSet_ImageBase64Format_ReturnFalse()
         {
-            var appDbContext = new Mock<IAppDbContext>();
-            var imageService = new ImageService(appDbContext.Object);
-
-            var result = imageService.Base64FormatExists(Base64ImageTestingHelper.FailedString);
+            var result = _imageService.Base64FormatExists(Base64ImageTestingHelper.FailedString);
             
             Assert.AreEqual(false, result);
         }
 
         [Test]
-        public async Task WhenUpload_ImageOnFileSystem_ReturnImageName()
-        {
-            var mockFile = new Mock<IFileSystem>();
-            mockFile.Setup(f => f.File.WriteAllBytesAsync(It.IsAny<string>(), It.IsAny<byte[]>(), CancellationToken.None))
-                .Returns(Task.CompletedTask);
-            
-            var fileSystemService = new FileSystemService(mockFile.Object);
-            var result = await fileSystemService.UploadImage(Base64ImageTestingHelper.EncodeString);
-            
-            mockFile.Verify(f=>f.File.WriteAllBytesAsync(It.IsAny<string>(), It.IsAny<byte[]>(), CancellationToken.None), Times.Once);
-            Assert.AreEqual("test.jpeg", result);
-        }
-
-        [Test]
         public async Task WhenSave_Image_ReturnImage()
         {
-            var appDbContext = new Mock<IAppDbContext>();
-            var images = DbSetExtensions.InMemoryImagesData();
-            appDbContext.Setup(i => i.Images).Returns(DbSetExtensions.CreateMockedDbSetAsync(images));
-
-            var imageService = new ImageService(appDbContext.Object);
-
-            var result = await imageService.SaveImage("test.jpeg");
+            var result = await _imageService.SaveImage("test.jpeg");
             
-            appDbContext.Verify(i=>i.Images.AddAsync(It.IsAny<Image>(), CancellationToken.None), Times.Once);
-            appDbContext.Verify(i=>i.SaveChangesAsync(CancellationToken.None), Times.Once);
+            _appDbContext.Verify(i=>i.Images.AddAsync(It.IsAny<Image>(), CancellationToken.None), Times.Once);
+            _appDbContext.Verify(i=>i.SaveChangesAsync(CancellationToken.None), Times.Once);
             
-            var expected = images.Find(i => i.Name == "test.jpeg");
+            var expected = _images.Find(i => i.Name == "test.jpeg");
             Assert.AreEqual(expected, result);
         }
     }

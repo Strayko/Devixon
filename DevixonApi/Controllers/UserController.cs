@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using DevixonApi.Data.Entities;
@@ -38,7 +39,6 @@ namespace DevixonApi.Controllers
             }
                 
             return Unauthorized(new {errors = "Invalid Credentials"});
-
         }
         
         [HttpPost]
@@ -50,7 +50,6 @@ namespace DevixonApi.Controllers
             
             var registerResponse = await _userService.Registration(registerRequest);
             return Ok(registerResponse);
-
         }
 
         [HttpGet]
@@ -75,6 +74,19 @@ namespace DevixonApi.Controllers
             var user = await _userService.UpdateUserAsync(userModel);
             
             return _mapper.Map<UserModel>(user);
+        }
+
+        [HttpDelete]
+        [Route("delete")]
+        public async Task<IActionResult> Delete()
+        {
+            var userId = HttpContext.User.Claims.First().Value;
+            if (userId == null) return BadRequest(new {errors = "User ID not found or expiry."});
+        
+            var result = await _userService.DeleteUserAsync(int.Parse(userId));
+            if (result == 1) return NoContent();
+            
+            return BadRequest(new {errors = "Database Failure."});
         }
 
         [HttpPost]

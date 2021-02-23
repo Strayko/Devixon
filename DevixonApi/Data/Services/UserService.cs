@@ -67,7 +67,7 @@ namespace DevixonApi.Data.Services
 
         public async Task<User> UpdateUserAsync(UserModel userModel)
         {
-            var user = _appDbContext.Users.SingleOrDefault(u => u.Id == userModel.Id);
+            var user = await _appDbContext.Users.SingleOrDefaultAsync(u => u.Id == userModel.Id);
             if (user == null) return null;
 
             user.FirstName = userModel.FirstName;
@@ -94,6 +94,15 @@ namespace DevixonApi.Data.Services
             var getUpdatedUser = GetUserAsync(userModel.Id);
 
             return await getUpdatedUser;
+        }
+
+        public async Task<int?> DeleteUserAsync(int userId)
+        {
+            var user = await _appDbContext.Users.SingleOrDefaultAsync(u => u.Id == userId);
+            if (user == null) return null;
+
+            _appDbContext.Users.Remove(user);
+            return await _appDbContext.SaveChangesAsync(CancellationToken.None);
         }
 
         public async Task<LoggedUserResponse> FacebookLoginAsync(FacebookLoginRequest facebookLoginRequest)

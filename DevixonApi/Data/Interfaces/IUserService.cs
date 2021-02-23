@@ -12,6 +12,7 @@ namespace DevixonApi.Data.Interfaces
         Task<LoggedUserResponse> Registration(RegisterRequest registerRequest);
         Task<LoggedUserResponse> FacebookLoginAsync(FacebookLoginRequest facebookLoginRequest);
         Task<User> UpdateUserAsync(UserModel userModel);
+        Task<int?> DeleteUserAsync(int userId);
         Task<User> GetUserAsync(int userId);
         bool ValidateToken(Token token);
     }
