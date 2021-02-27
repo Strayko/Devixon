@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using DevixonApi.Data.Entities;
@@ -114,7 +115,7 @@ namespace DevixonApi.Tests
         }
 
         [Test]
-        public async Task WhenUpdate_User_NotFoundById()
+        public async Task WhenUpdate_User_ReturnNotFoundById()
         {
             const string wrongUserIdValues = "2,test,test,test@live.com,null,null";
             var userModel = _userTestingHelper.Model(wrongUserIdValues);
@@ -125,7 +126,7 @@ namespace DevixonApi.Tests
         }
 
         [Test]
-        public async Task WhenUpdate_User_PasswordNotSet()
+        public async Task WhenUpdate_User_ReturnPasswordNotSet()
         {
             var user = _users.Find(u => u.Id == 1);
             
@@ -136,6 +137,16 @@ namespace DevixonApi.Tests
             _appDbContext.Verify(x=>x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
             
             Assert.AreEqual(user.Password, result.Password);
+        }
+
+        [Test]
+        public async Task WhenDelete_User_ReturnNoContent()
+        {
+            var user = _users.Find(u => u.Id == 1);
+            await _userService.DeleteUserAsync(user.Id);
+
+            Assert.AreEqual(0,_users.Count);
+            _appDbContext.Verify(o=>o.SaveChangesAsync(CancellationToken.None), Times.Once);
         }
     }
 }

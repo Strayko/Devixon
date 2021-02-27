@@ -37,6 +37,9 @@ namespace DevixonApi.Tests.Extension
                 .Callback<T, CancellationToken>((entity, cancellationToken) => { data.Add(entity); })
                 .Returns((T model, CancellationToken token) => new ValueTask<EntityEntry<T>>());
 
+            mockSet.Setup(s => s.Remove(It.IsAny<T>()))
+                .Callback<T>((entity) => { data.Remove(entity); });
+
             mockSet.As<IQueryable<T>>().Setup(m => m.Expression).Returns(queryable.Expression);
             mockSet.As<IQueryable<T>>().Setup(m => m.ElementType).Returns(queryable.ElementType);
             mockSet.As<IQueryable<T>>().Setup(m => m.GetEnumerator()).Returns(queryable.GetEnumerator());
