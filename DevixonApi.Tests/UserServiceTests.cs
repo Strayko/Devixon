@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using DevixonApi.Data.Entities;
@@ -24,6 +23,7 @@ namespace DevixonApi.Tests
         private UserService _userService;
         private List<User> _users;
         private UserTestingHelper _userTestingHelper;
+        private User _user;
 
         [SetUp]
         public void SetUp()
@@ -34,6 +34,7 @@ namespace DevixonApi.Tests
             _fileSystemService = new Mock<IFileSystemService>();
             _userTestingHelper = new UserTestingHelper();
             _users = DbSetExtensions.InMemoryUsersData();
+            _user = _users.Find(u => u.Id == 1);
             _appDbContext.Setup(u => u.Users).Returns(DbSetExtensions.CreateMockedDbSetAsync(_users));
             _userService = new UserService(
                 _appDbContext.Object, 
@@ -91,11 +92,9 @@ namespace DevixonApi.Tests
         [Test]
         public async Task WhenRequest_UserById_ReturnUser()
         {
-            var user = _users.Find(u=>u.Id == 1);
+            var result = await _userService.GetUserAsync(_user.Id);
             
-            var result = await _userService.GetUserAsync(user.Id);
-            
-            Assert.AreEqual(user, result);
+            Assert.AreEqual(_user, result);
         }
 
         [Test]
@@ -128,22 +127,19 @@ namespace DevixonApi.Tests
         [Test]
         public async Task WhenUpdate_User_ReturnPasswordNotSet()
         {
-            var user = _users.Find(u => u.Id == 1);
-            
             const string passwordNotSetValues = "1,test,test,test@live.com,null,null";
             var userModel = _userTestingHelper.Model(passwordNotSetValues);
 
             var result = await _userService.UpdateUserAsync(userModel);
             _appDbContext.Verify(x=>x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
             
-            Assert.AreEqual(user.Password, result.Password);
+            Assert.AreEqual(_user.Password, result.Password);
         }
 
         [Test]
         public async Task WhenDelete_User_ReturnNoContent()
         {
-            var user = _users.Find(u => u.Id == 1);
-            await _userService.DeleteUserAsync(user.Id);
+            await _userService.DeleteUserAsync(_user.Id);
 
             Assert.AreEqual(0,_users.Count);
             _appDbContext.Verify(o=>o.SaveChangesAsync(CancellationToken.None), Times.Once);
